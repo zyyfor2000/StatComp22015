@@ -4,14 +4,14 @@ author: "22015"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to StatComp}
+  %\VignetteIndexEntry{Introduction to StatComp22015}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ## Overview
 
-__StatComp__ is a simple R package developed to compare the performance of R and R++ (implemented through the R package _Rcpp_) for the 'Statistical Computing' course. Two functions are considered, namely, _gibbs_ (generate random nubers using Gibbs sampler) and _vacc_ (predicting the response using three variables: age, gender, and ily). For each function, both R and Rcpp versions are produced. Namely _gibbsR_ and  _vaccR_ for R and 'gibbC' and _vaccC_ for C++.
+__StatComp22015__ is a simple R package developed to compare the performance of R and R++ (implemented through the R package _Rcpp_) for the 'Statistical Computing' course. Two functions are considered, namely, _gibbs_ (generate random nubers using Gibbs sampler) and _vacc_ (predicting the response using three variables: age, gender, and ily). For each function, both R and Rcpp versions are produced. Namely _gibbsR_ and  _vaccR_ for R and 'gibbC' and _vaccC_ for C++.
 
 The R package 'microbenchmark' can be used to benchmark the above R and C++ functions.
 
@@ -50,10 +50,10 @@ NumericVector vaccC(NumericVector age, LogicalVector female,
 }
 ```
 
-In order to empirically benchmark _vaccR_ and _vaccC_, one generates 1,000 repicates of (age, female, ily), and save it in data{StatComp}. To load the file, one simply calls _data(data)_. The R code for benchmark _vaccR_ and _vaccC_ is as follows.
+In order to empirically benchmark _vaccR_ and _vaccC_, one generates 1,000 repicates of (age, female, ily), and save it in data{StatComp22015}. To load the file, one simply calls _data(data)_. The R code for benchmark _vaccR_ and _vaccC_ is as follows.
 
 ```{r,eval=TRUE}
-library(StatComp)
+library(StatComp22015)
 library(microbenchmark)
 data(data)
 attach(data)

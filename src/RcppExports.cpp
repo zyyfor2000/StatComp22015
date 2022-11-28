@@ -10,19 +10,35 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _StatComp22015_rcpp_hello_world() {
+// gibbsC
+NumericMatrix gibbsC(int N, int thin);
+RcppExport SEXP _StatComp22015_gibbsC(SEXP NSEXP, SEXP thinSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type thin(thinSEXP);
+    rcpp_result_gen = Rcpp::wrap(gibbsC(N, thin));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vaccC
+NumericVector vaccC(NumericVector age, LogicalVector female, LogicalVector ily);
+RcppExport SEXP _StatComp22015_vaccC(SEXP ageSEXP, SEXP femaleSEXP, SEXP ilySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type age(ageSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type female(femaleSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type ily(ilySEXP);
+    rcpp_result_gen = Rcpp::wrap(vaccC(age, female, ily));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_StatComp22015_rcpp_hello_world", (DL_FUNC) &_StatComp22015_rcpp_hello_world, 0},
+    {"_StatComp22015_gibbsC", (DL_FUNC) &_StatComp22015_gibbsC, 2},
+    {"_StatComp22015_vaccC", (DL_FUNC) &_StatComp22015_vaccC, 3},
     {NULL, NULL, 0}
 };
 

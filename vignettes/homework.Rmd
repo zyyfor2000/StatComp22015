@@ -1,0 +1,105 @@
+---
+title: "Document Including all My Homework Answers"
+author: "22015"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Document Including all My Homework Answers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+All my homework answers about Statistical Computing class.
+
+# "A-22015-2022-09-09"
+
+## Example 1
+
+#### Simple description: some exercises about R basic use.
+
+```{r}
+seq(1, 5, 0.5)
+seq(length=9, from=1, to=5)
+rep(1,5)
+sequence(4:5)
+gl(2, 6, label=c("Male", "Female"))
+expand.grid(h=c(60,80), w=c(100, 300), sex=c("Male", "Female"))
+qnorm(0.975)
+matrix(1:6, 2, 3, byrow=TRUE)
+ts(1:47, frequency = 12, start = c(1959, 2))
+```
+
+## Example 2
+
+#### Simple description: try to draw pictures.
+
+```{r echo=FALSE}
+x = rnorm(10)
+y = rnorm(10)
+plot(x, y, xlab="Ten random values", ylab="Ten other values",
+     xlim=c(-2, 2), ylim=c(-2, 2), pch=22, col="red",
+     bg="yellow", bty="l", tcl=0.4,
+     main="How to customize a plot with R", las=1, cex=1.5)
+```
+```{r}
+library(lattice)
+n <- seq(5, 45, 5)
+x <- rnorm(sum(n))
+y <- factor(rep(n, n), labels=paste("n =", n))
+densityplot(~ x | y,
+            panel = function(x, ...) {
+                panel.densityplot(x, col="DarkOliveGreen", ...)
+                panel.mathdensity(dmath=dnorm,
+                                  args=list(mean=mean(x), sd=sd(x)),
+                                  col="darkblue")
+})
+```
+
+## Example 3
+
+#### Simple description: how to write a program by myself.
+
+```{r}
+ricker <- function(nzero, r, K=1, time=100, from=0, to=time) {
+    N <- numeric(time+1)
+    N[1] <- nzero
+    for (i in 1:time) N[i+1] <- N[i]*exp(r*(1 - N[i]/K))
+    Time <- 0:time
+    plot(Time, N, type="l", xlim=c(from, to))
+}
+ricker(0.1, 1); title("r = 1")
+```
+
+## Example 4
+
+#### Simple description: An convenient function -- use  xtable to get the table in latex form.
+
+```{r}
+xtable::xtable(head(iris))
+```
+
+## Example 5
+
+#### Simple description: an easy exercise about how to import data and write formula in latex forms.
+  
+```{r}
+data = read.table("../data/Bank_loan.txt",head=TRUE,na.strings = c("NA"))
+past.customers = subset(data,default != "NA")
+pie(c(sum(past.customers$default == 1),sum(past.customers$default == 0)),c(1,0))
+for (i in 1:4){
+a = nrow(past.customers[past.customers$default ==0 & past.customers$edu == i,])/nrow(past.customers[past.customers$edu==i,])
+b = nrow(past.customers[past.customers$default ==1 & past.customers$edu == i,])/nrow(past.customers[past.customers$edu==i,])
+if (i == 1){
+  b_0 = b
+  a_0 = a
+  next
+}
+a_0 = c(a_0,a)
+b_0 = c(b_0,b)
+}
+probability_on_condition = data.frame(c(1:4),a_0,b_0)
+```
+
+

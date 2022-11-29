@@ -25,12 +25,6 @@ NULL
 #'   rnC = gibbsC(100,10)
 #' )
 #' print(summary(tm1)[,c(1,3,5,6)])
-#' 
-#' tm2 <- microbenchmark::microbenchmark(
-#'   vR = vaccR(age,female,ily),
-#'   vC = vaccC(age,female,ily)
-#' )
-#' print(summary(tm2)[,c(1,3,5,6)])
 #' }
 #' @import microbenchmark
 #' @importFrom Rcpp evalCpp
@@ -74,28 +68,37 @@ vaccR <- function(age, female, ily) {
   p
 }
 
-#' @title A Gibbs sampler using R
+#' @title A Gibbs sampler using R for bivariate normal distribution
 #' @description A Gibbs sampler using R
 #' @param N the number of samples
+#' @param burn burn-in length
 #' @param thin the number of between-sample random numbers
-#' @return a random sample of size \code{n}
+#' @param mu1 N(mu1,mu2,sigma1^2,sigma2^2,rho)
+#' @param mu2 N(mu1,mu2,sigma1^2,sigma2^2,rho)
+#' @param sigma1 N(mu1,mu2,sigma1^2,sigma2^2,rho)
+#' @param sigma2 N(mu1,mu2,sigma1^2,sigma2^2,rho)
+#' @param rho N(mu1,mu2,sigma1^2,sigma2^2,rho)
+#' @return a random sample of size \code{N-burn}
 #' @examples
 #' \dontrun{
-#' rnR <- gibbsR(100,10)
-#' par(mfrow=c(2,1));
-#' plot(rnR[,1],type='l')
-#' plot(rnR[,2],type='l')
+#' X = gibbsR(10000,1000,10,0,0,1,1,0.9)
+#' plot(mat, main="", cex=.5, xlab=bquote(X[1]),ylab=bquote(X[2]), ylim=range(x[,2]))
 #' }
 #' @export
-gibbsR <- function(N, thin) {
-  mat <- matrix(nrow = N, ncol = 2)
-  x <- y <- 0
-  for (i in 1:N) {
+gibbsR = function(N,burn,thin,mu1,mu2,sigma1,sigma2,rho) {
+  mat = matrix(0,nrow = N, ncol = 2)
+  mat[1,] = c(mu1,mu2)
+  s1 = sqrt(1-rho^2)*sigma1
+  s2 = sqrt(1-rho^2)*sigma2
+  for (i in 2:N) {
     for (j in 1:thin) {
-      x <- rgamma(1, 3, y * y + 4)
-      y <- rnorm(1, 1 / (x + 1), 1 / sqrt(2 * (x + 1)))
+      y = mat[i-1, 2]
+      m1 = mu1 + rho * (y - mu2) * sigma1/sigma2
+      x = rnorm(1, m1, s1)
+      m2 = mu2 + rho * (x - mu1) * sigma2/sigma1
+      y = rnorm(1, m2, s2)
     }
-    mat[i, ] <- c(x, y)
+    mat[i, ] = c(x, y)
   }
-  mat
+  mat[(burn+1):N,]
 }

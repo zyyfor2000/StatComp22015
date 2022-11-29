@@ -2,26 +2,36 @@
 % Please edit documentation in R/RcppExports.R
 \name{gibbsC}
 \alias{gibbsC}
-\title{A Gibbs sampler using Rcpp}
+\title{A Gibbs sampler using Rcpp for bivariate normal distribution}
 \usage{
-gibbsC(N, thin)
+gibbsC(N, burn, thin, mu1, mu2, sigma1, sigma2, rho)
 }
 \arguments{
 \item{N}{the number of samples}
 
+\item{burn}{burn-in length}
+
 \item{thin}{the number of between-sample random numbers}
+
+\item{mu1}{N(mu1,mu2,sigma1^2,sigma2^2,rho)}
+
+\item{mu2}{N(mu1,mu2,sigma1^2,sigma2^2,rho)}
+
+\item{sigma1}{N(mu1,mu2,sigma1^2,sigma2^2,rho)}
+
+\item{sigma2}{N(mu1,mu2,sigma1^2,sigma2^2,rho)}
+
+\item{rho}{N(mu1,mu2,sigma1^2,sigma2^2,rho)}
 }
 \value{
-a random sample of size \code{n}
+a random sample of size \code{N-burn}
 }
 \description{
 A Gibbs sampler using Rcpp
 }
 \examples{
 \dontrun{
-rnC <- gibbsC(100,10)
-par(mfrow=c(2,1));
-plot(rnC[,1],type='l')
-plot(rnC[,2],type='l')
+X = gibbsC(10000,1000,10,0,0,1,1,0.9)
+plot(mat, main="", cex=.5, xlab=bquote(X[1]),ylab=bquote(X[2]), ylim=range(x[,2]))
 }
 }

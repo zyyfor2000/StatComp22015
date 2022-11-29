@@ -11,14 +11,20 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // gibbsC
-NumericMatrix gibbsC(int N, int thin);
-RcppExport SEXP _StatComp22015_gibbsC(SEXP NSEXP, SEXP thinSEXP) {
+NumericMatrix gibbsC(int N, int burn, int thin, double mu1, double mu2, double sigma1, double sigma2, double rho);
+RcppExport SEXP _StatComp22015_gibbsC(SEXP NSEXP, SEXP burnSEXP, SEXP thinSEXP, SEXP mu1SEXP, SEXP mu2SEXP, SEXP sigma1SEXP, SEXP sigma2SEXP, SEXP rhoSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type burn(burnSEXP);
     Rcpp::traits::input_parameter< int >::type thin(thinSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbsC(N, thin));
+    Rcpp::traits::input_parameter< double >::type mu1(mu1SEXP);
+    Rcpp::traits::input_parameter< double >::type mu2(mu2SEXP);
+    Rcpp::traits::input_parameter< double >::type sigma1(sigma1SEXP);
+    Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    rcpp_result_gen = Rcpp::wrap(gibbsC(N, burn, thin, mu1, mu2, sigma1, sigma2, rho));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -35,7 +41,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_StatComp22015_gibbsC", (DL_FUNC) &_StatComp22015_gibbsC, 2},
+    {"_StatComp22015_gibbsC", (DL_FUNC) &_StatComp22015_gibbsC, 8},
     {"_StatComp22015_test", (DL_FUNC) &_StatComp22015_test, 1},
     {NULL, NULL, 0}
 };

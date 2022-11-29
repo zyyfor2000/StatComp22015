@@ -64,8 +64,8 @@ The R code for benchmarking _gibbsR_ and _gibbsC_ is as follows.
 
 ```{r,eval=TRUE}
 tm2 <- microbenchmark(
-  vR = gibbsR(1e4, 10),
-  vC = gibbsC(1e4, 10)
+  vR = gibbsR(1000,100,1,0,0,1,1,0.9),
+  vC = gibbsC(1000,100,1,0,0,1,1,0.9)
 )
 knitr::kable(summary(tm2)[,c(1,3,5,6)])
 ```

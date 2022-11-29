@@ -22,23 +22,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// vaccC
-NumericVector vaccC(NumericVector age, LogicalVector female, LogicalVector ily);
-RcppExport SEXP _StatComp22015_vaccC(SEXP ageSEXP, SEXP femaleSEXP, SEXP ilySEXP) {
+// test
+int test(int n);
+RcppExport SEXP _StatComp22015_test(SEXP nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type age(ageSEXP);
-    Rcpp::traits::input_parameter< LogicalVector >::type female(femaleSEXP);
-    Rcpp::traits::input_parameter< LogicalVector >::type ily(ilySEXP);
-    rcpp_result_gen = Rcpp::wrap(vaccC(age, female, ily));
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(test(n));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_StatComp22015_gibbsC", (DL_FUNC) &_StatComp22015_gibbsC, 2},
-    {"_StatComp22015_vaccC", (DL_FUNC) &_StatComp22015_vaccC, 3},
+    {"_StatComp22015_test", (DL_FUNC) &_StatComp22015_test, 1},
     {NULL, NULL, 0}
 };
 

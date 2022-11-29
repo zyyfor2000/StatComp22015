@@ -2,7 +2,7 @@
 
 export(gibbsC)
 export(gibbsR)
-export(vaccC)
+export(test)
 export(vaccR)
 import(microbenchmark)
 importFrom(Rcpp,evalCpp)

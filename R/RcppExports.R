@@ -20,18 +20,16 @@ gibbsC <- function(N, thin) {
 
 #' @title Use three inputs to predict response using Rcpp.
 #' @description The prediction model is described in http://www.babelgraph.org/wp/?p=358.
-#' @param age the first predictor (numeric)
-#' @param female the second predictor (logical)
-#' @param ily the third predictor (logical)
-#' @return a random sample of size \code{n}
+#' @param n the first predictor (numeric)
+#' @return square of \code{n}
 #' @examples
 #' \dontrun{
-#' data(data)
+#' data(data)引用数据的方式
 #' attach(data)
-#' res <- vaccC(age,female,ily)
+#' res <- test(n)
 #' }
 #' @export
-vaccC <- function(age, female, ily) {
-    .Call('_StatComp22015_vaccC', PACKAGE = 'StatComp22015', age, female, ily)
+test <- function(n) {
+    .Call('_StatComp22015_test', PACKAGE = 'StatComp22015', n)
 }
 

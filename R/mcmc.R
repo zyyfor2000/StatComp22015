@@ -1,58 +1,33 @@
-#' @title Benchmark R and Rcpp functions.
-#' @name benchmarks
-#' @description Use R package \code{microbenchmark} to compare the performance of C functions (\code{gibbsR} and \code{vaccR}) and Cpp functions (\code{gibbsC} and \code{vaccC}).
-#' @examples
-#' \dontrun{
-#' data(data)
-#' attach(data)
-#' tm1 <- microbenchmark::microbenchmark(
-#'   rnR = gibbsR(100,10),
-#'   rnC = gibbsC(100,10)
-#' )
-#' print(summary(tm1)[,c(1,3,5,6)])
-#' }
-#' @import microbenchmark
-#' @import lattice
-#' @import xtable
-#' @importFrom Rcpp evalCpp
-#' @importFrom stats rnorm rgamma
-#' @useDynLib StatComp22015
-NULL
 
-#' @title A dataset used for illustration.
-#' @name data
-#' @description This dataset is used to compare the performance of C function \code{vaccR}) and C++ function \code{vaccC}.
+#' @title A random walk Metropolis sampler using R for t distribution
+#' @description A random walk Metropolis sampler using R
+#' @param n degree of freedom of t distribution
+#' @param sigma standard variance of proposal distribution N(xt,sigma^2)
+#' @param x0 initial value
+#' @param burn burn-in length
+#' @param N size of random numbers required
+#' @return a random sample of size \code{N-burn}
 #' @examples
 #' \dontrun{
-#' data(data)
-#' attach(data)
-#' tm <- microbenchmark::microbenchmark(
-#'   vR = vaccR(age,female,ily),
-#'   vC = vaccC(age,female,ily)
-#' )
-#' print(summary(tm)[,c(1,3,5,6)])
-#' }
-NULL
-
-#' @title Use three inputs to predict response using R.
-#' @description The prediction model is described in http://www.babelgraph.org/wp/?p=358.
-#' @param age the first predictor (numeric)
-#' @param female the second predictor (logical)
-#' @param ily the third predictor (logical)
-#' @return a random sample of size \code{n}
-#' @examples
-#' \dontrun{
-#' data(data)
-#' attach(data)
-#' res <- vaccR(age,female,ily)
+#' X = rwMetropolisR(2,1,1,100,2) #n = 2
+#' a = c(0.05,seq(0.1,0.9,0.1),0.95)
+#' Q = qt(a,2)
+#' qqplot(a,quantile(X,a))
 #' }
 #' @export
-vaccR <- function(age, female, ily) {
-  p <- 0.25 + 0.3 * 1 / (1 - exp(0.04 * age)) + 0.1 * ily
-  p <- p * ifelse(female, 1.25, 0.75)
-  p <- pmax(0, p)
-  p <- pmin(1, p)
-  p
+rwMetropolisR = function(n, sigma, x0, N, burn) {
+    x = numeric(N)
+    x[1] = x0
+    u = runif(N)
+    for (i in 2:N) {
+    y = rnorm(1, x[i-1], sigma)
+    if (u[i] <= (dt(y, n) / dt(x[i-1], n)))
+      x[i] = y  
+    else {
+      x[i] = x[i-1]
+    }
+  }
+  return(x[(burn+1):N])
 }
 
 #' @title A Gibbs sampler using R for bivariate normal distribution

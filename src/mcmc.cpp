@@ -45,8 +45,12 @@ NumericMatrix gibbsC(int N,int burn, int thin, double mu1, double mu2,double sig
 
 //' @title Use three inputs to predict response using Rcpp.
 //' @description The prediction model is described in http://www.babelgraph.org/wp/?p=358.
-//' @param n the first predictor (numeric)
-//' @return square of \code{n}
+//' @param n degree of freedom of t distribution
+//' @param sigma standard variance of proposal distribution N(xt,sigma^2)
+//' @param x0 initial value
+//' @param burn burn-in length
+//' @param N size of random numbers required
+//' @return a random sample of size \code{N-burn}
 //' @examples
 //' \dontrun{
 //' data(data)引用数据的方式
@@ -55,7 +59,22 @@ NumericMatrix gibbsC(int N,int burn, int thin, double mu1, double mu2,double sig
 //' }
 //' @export
 // [[Rcpp::export]]
-int test(int n) {
-  int out = n*n;
-  return out;
+NumericVector rwMetropolisC(int n, double sigma, double x0, int N, int burn) {
+  NumericVector x(N);
+  x[1] = x0;
+  for (int i = 1; i < N; i++) {
+    double u = runif(1)[0];
+    double y = rnorm(1, x[i-1], sigma)[0];
+    double tmp1 = ::Rf_dt(y, n, 0) ;
+    double tmp2 = ::Rf_dt(x[i-1], n, 0);
+    double tmp = tmp1/tmp2;
+    if (u <= tmp){
+      x[i] = y  ;
+    }
+      else {
+        x[i] = x[i-1];
+      }
+  }
+  NumericVector xlast = x[Range(burn,N-1)];
+  return(xlast);
 }

@@ -28,21 +28,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// test
-int test(int n);
-RcppExport SEXP _StatComp22015_test(SEXP nSEXP) {
+// rwMetropolisC
+NumericVector rwMetropolisC(int n, double sigma, double x0, int N, int burn);
+RcppExport SEXP _StatComp22015_rwMetropolisC(SEXP nSEXP, SEXP sigmaSEXP, SEXP x0SEXP, SEXP NSEXP, SEXP burnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(test(n));
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type burn(burnSEXP);
+    rcpp_result_gen = Rcpp::wrap(rwMetropolisC(n, sigma, x0, N, burn));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_StatComp22015_gibbsC", (DL_FUNC) &_StatComp22015_gibbsC, 8},
-    {"_StatComp22015_test", (DL_FUNC) &_StatComp22015_test, 1},
+    {"_StatComp22015_rwMetropolisC", (DL_FUNC) &_StatComp22015_rwMetropolisC, 5},
     {NULL, NULL, 0}
 };
 

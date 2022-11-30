@@ -9,11 +9,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-## Overview
+# Overview
 
 All my homework answers about Statistical Computing class.
 
-# "A-22015-2022-09-09"
+# HW0: "A-22015-2022-09-09"
 
 ## Example 1
 

@@ -24,8 +24,12 @@ gibbsC <- function(N, burn, thin, mu1, mu2, sigma1, sigma2, rho) {
 
 #' @title Use three inputs to predict response using Rcpp.
 #' @description The prediction model is described in http://www.babelgraph.org/wp/?p=358.
-#' @param n the first predictor (numeric)
-#' @return square of \code{n}
+#' @param n degree of freedom of t distribution
+#' @param sigma standard variance of proposal distribution N(xt,sigma^2)
+#' @param x0 initial value
+#' @param burn burn-in length
+#' @param N size of random numbers required
+#' @return a random sample of size \code{N-burn}
 #' @examples
 #' \dontrun{
 #' data(data)引用数据的方式
@@ -33,7 +37,7 @@ gibbsC <- function(N, burn, thin, mu1, mu2, sigma1, sigma2, rho) {
 #' res <- test(n)
 #' }
 #' @export
-test <- function(n) {
-    .Call('_StatComp22015_test', PACKAGE = 'StatComp22015', n)
+rwMetropolisC <- function(n, sigma, x0, N, burn) {
+    .Call('_StatComp22015_rwMetropolisC', PACKAGE = 'StatComp22015', n, sigma, x0, N, burn)
 }
 

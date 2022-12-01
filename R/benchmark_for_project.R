@@ -14,8 +14,9 @@
 #' @import microbenchmark
 #' @import lattice
 #' @import xtable
+#' @import EnvStats
 #' @importFrom Rcpp evalCpp
-#' @importFrom stats rnorm rgamma runif dt
+#' @importFrom stats rnorm rgamma runif dt mahalanobis
 #' @useDynLib StatComp22015
 NULL
 

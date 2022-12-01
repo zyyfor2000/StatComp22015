@@ -11,7 +11,7 @@ vignette: >
 
 # Overview
 
-All my homework answers about Statistical Computing class.
+All my homework answers about Statistical Computing class including from hw0 to hw10 is as follows.
 
 # HW0: "A-22015-2022-09-09"
 
@@ -101,5 +101,588 @@ b_0 = c(b_0,b)
 }
 probability_on_condition = data.frame(c(1:4),a_0,b_0)
 ```
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+# HW1: "A-22015-2022-09-15"
+
+## **Question 3.3**
+
+<font size=4>
+The Pareto(a, b) distribution has cdf 
+
+$$
+F(x)=1-\left(\frac{b}{x}\right)^a, \quad x \geq b>0, a>0
+$$
+
+Derive the probability inverse transformation $F^{-1}(U)$ and use the inverse transform method to simulate a random sample from the Pareto(2, 2) distribution. Graph the density histogram of the sample with the Pareto(2, 2) density superimposed for comparison.
+<font>    
+
+## **Answer**
+
+<font size=4.5>
+First we can derive the probability inverse transformation $F^{-1}(U)$ which equals to $\frac{b}{(1-U)^{\frac{1}{a}}}$ by the equation $U =1-\left(\frac{b}{x}\right)^a$. And $F(x)' = f(x) = ab^ax^{-a-1}$. 
+Then we can simulate a random sample from the Pareto(2,2) distribution and compare it with the  Pareto(2,2) density using the density histogram. The results are listed as follows.
+
+```{r, fig.align='center'}
+a = 2; b = 2
+n = 100000
+u = runif(n)
+x = b/(1-u)**{1/a}
+hist(x, prob = TRUE, main = expression(f(x) == ab^ax^{-a-1}))
+y = seq(1,1000,0.01)
+lines(y,a*b^a*y^{-a-1})
+# we can derive commands about pareto by pakage EnvStats
+# library(EnvStats)
+# lines(y,dpareto(y,a,b))  this is the same result as above
+
+```
+
+- The histogram and density plot in figure above suggests that the empirical and theoretical distributions approximately agree.
+<font>
+
+---
+
+## **Question 3.7**
+
+<font size=4>
+Write a function to generate a random sample of size n from the Beta(a,b) distribution by the acceptance-rejection method. Generate a random sample of size 1000 from the Beta(3,2) distribution. Graph the histogram of the sample with the theoretical Beta(3,2) density superimposed.
+<font>
+
+## **Answer**
+
+<font size=4.5>
+The Beta(a,b) density is 
+$$
+f(x ; \alpha, \beta)=\frac{x^{\alpha-1}(1-x)^{\beta-1}}{\int_0^1 u^{\alpha-1}(1-u)^{\beta-1} d u}=\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) \Gamma(\beta)} x^{\alpha-1}(1-x)^{\beta-1}=\frac{1}{B(\alpha, \beta)} x^{\alpha-1}(1-x)^{\beta-1}
+\\
+\beta,\alpha>0, \quad 0<x<1
+$$
+Let $g(x)$ be the Uniform(0,1) density. Then $\frac{f(x)}{cg(x)} \leq 1$ for all $0<x<1$.
+
+By using the program below ,we can generate a random sample of size n from the Beta(a,b) distribution by the acceptance-rejection method.
+```{r}
+f_beta = function(n,c,a,b){   # n:sample size c,a,b:predefined number
+  k = 0  #counter for accepted
+  j = 0  #iterations
+  y = numeric(n)
+    while(k<n){
+      u = runif(1)
+      j = j + 1
+      x = runif(1)
+      if (x**{a-1}*(1-x)**{b-1}/beta(a,b)/c >u){
+        # we accept x
+        k = k + 1
+        y[k] = x
+      }
+    }
+  y
+}
+```
+
+Then we can use the program f_beta to generate a random sample of size 1000 from the Beta(3,2) distribution. 
+The Beta(3,2) density is $12x^2(1-x)$, so we can fix $c = \frac{16}{9}$ to not only satisfy the condition but also enhance the efficiency. 
+Meanwhile, we can graph the histogram of the sample with the theoretical Beta(3,2) density superimposed. 
+
+The results are listed as follows.
+
+```{r,fig.align='center'}
+n = 1000
+a = 3
+b = 2
+c = 16/9 
+x = f_beta(n,c,a,b)
+hist(x,probability = TRUE, main = expression(f(x)==12*x^2*(1-x)),ylim =c(0,2))
+y = seq(0,1,0.01)
+lines(y,dbeta(y,3,2))
+```
+
+- The histogram and density plot in figure above suggests that the empirical and theoretical distributions don't agree  very well because the sample is not large enough.
+
+Also we can use Quantile-quantile plot for 'rbeta' and 'acceptance-rejection' algorithm as follows.
+
+```{r,echo=FALSE,fig.align='center'}
+qqplot(x,rbeta(n,3,2),xlab='Accpetance-rejection',ylab='rbeta')
+abline(0,1,col='blue',lwd=2)
+```
+<font>
+
+---
+
+## **Question 3.12**
+
+<font size=4>
+Simulate a continuous Exponential-Gamma mixture. Suppose that the rate parameter $\Lambda$ has $Gamma(\gamma,\beta)$ distribution and $Y$ has $Exp(\Lambda)$ distribution. That is, $(Y|\Lambda=\lambda)\sim f_{Y}(y|\lambda)=\lambda e^{-\lambda y}$. Generate 1000 random observations from this mixture with $\gamma = 4$ and $\beta = 2$
+<font>
+
+## **Answer**
+<font size=4.5>
+
+According to the requirements of the question, we can derive 1000 random observations as follows. The hist figure can show the observations intuitively.
+
+```{r, fig.align='center'}
+n = 1000
+r = 4
+beta = 2
+lamda = rgamma(n, r, beta)
+x = rexp(n, rate = lamda)
+hist(x)
+```
+<font>
+
+---
+
+## **Question 3.13**
+<font size = 4>
+It can be shown that the mixture in Exercise 3.12 has a Pareto distribution with cdf
+$$
+F(y)=1-\left(\frac{\beta}{\beta+y}\right)^r, \quad y \geq 0
+$$
+
+(This is an alternative parameterization of the Pareto cdf given in Exercise 3.3.) Generate 1000 random observations from the mixture with $\gamma = 4$ and $\beta = 2$. Compare the empirical and theoretical (Pareto) distributions by graphing the density histogram of the sample and superimposing the Pareto density curve.
+
+<font>
+
+## **Answer**
+
+<font size=4.5>
+Through the discussion in the  first section, then we can  derive theoretical (Pareto)  probability density function either by the derivation of cdf or the useful command `dpareto`in EnvStats package.
+The pdf function is $$f(y)=\beta^\gamma\gamma(\beta+y)^{-r-1},y\geq0$$
+The results are listed as follows.
+
+```{r, fig.align='center'}
+library(EnvStats)
+hist(x,probability = TRUE, main = expression(f(x)==beta^{gamma}*gamma*(beta+x)^{-r-1},y >= 0))
+y = seq(0,6,0.01)
+z = seq(b,6+b,0.01)
+lines(y,b^{r}*r*(b+y)^{-r-1},col = "blue",lwd = 2)
+lines(z-b,dpareto(z,location = b,shape = r),col = "red",lwd = 1, lty = 1)
+```
+
+- The histogram and density plot in figure above suggests that the empirical and theoretical distributions approximately agree.Besides, the two ways contribute to the same line.
+
+<font>
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+# HW2: "A-22015-2022-09-23"
+
+## Question {#question}
+
+1.  Exercises 1 (About fast sorting algorithm). [Jump to the
+    Answer](#question1ans)
+
+2.  Exercises 5.6 (Page 150, Statistical Computing with R). [Jump to the
+    Answer](#question2ans)
+
+3.  Exercises 5.7 (Page 150, Statistical Computing with R). [Jump to the
+    Answer](#question3ans)
+
+## Answer
+
+### Exercise 1 {#question1ans}
+<font size=4.5>
+**Problem.**
+
++ For $n=10^4,2\times10^4,4\times10^4,6\times10^4,8\times10^4$, apply
+the fast sorting algorithm to randomly permuted numbers of
+$1,\ldots,n$. 
+
++ Calculate computation time averaged over 100
+simulations, denoted by $a_n$. 
+
++ Regress $a_n$ on $t_n:=n\log(n)$, and
+graphically show the results (scatter plot and regression line).
+
+**Solution.** 
+
+According to the quick sort algorithm we have been
+afforded, we can apply it easily. Due to the fact that the expected
+complexity of this algorithm is $O(n log(n))$, the actual time they cost
+which are denoted as $a_n$ is proportional to $t_n:=n\log(n)$. As a
+result, we show scatter plot and regression line to visulize the
+conclusion by manipulating the algorithm.
+
+The answers are shown below.
+
+```{r}
+set.seed(100)
+# the quick sort algorithm
+quick_sort<-function(x){
+  num<-length(x)
+  if(num==0||num==1){return(x)
+  }else{
+    a<-x[1]
+    y<-x[-1]
+    lower<-y[y<a]
+    upper<-y[y>=a]
+    return(c(quick_sort(lower),a,quick_sort(upper)))}
+}
+# apply it to randomly permuted numbers of 1,...,n when n in diferent numbers
+for (n in c(1e4,2e4,4e4,6e4,8e4)){
+  test<-sample(1:n)
+  quick_sort(test)
+}
+# caculate computation time averaged over 100 simulations
+n_simulation = 100
+a = rep(0,5)
+t = rep(0,5)
+i = 1 # counter
+for (n in c(1e4,2e4,4e4,6e4,8e4)){
+  s_time = 0  # the sum of time
+  for (j in c(1:n_simulation)){
+  test<-sample(1:n)
+  s_time = s_time + system.time(quick_sort(test))[1]
+  }
+  a[i] = s_time/n_simulation
+  t[i] = n*log(n)
+  i = i + 1
+}
+print(a)
+print(t)
+```
+
+We can see the value of $a_n$ and $t_n$ from the results above.
+
+```{r, fig.align='center'}
+# scatter plot and regression line
+plot(t,a,xlab='theoretical time:nlog(n)', ylab='actual time',main = "Relationship between Theoretical and Actual Time")
+abline(lm(a~t),col='red')
+```
+
+It can be shown that regression line well fit the scatter plot.
+
+[Back to the Question](#question)
+
+### Exercise 5.6 {#question2ans}
+
+**Problem.** 
+
+In Example 5.7 the control variate approach was illustrated
+for Monte Carlo integration of $$
+\theta = \int_{0}^{1}e^{x}dx
+$$ Now consider the antithetic variate approach. Compute
+$Cov(e^U,e^{1−U})$ and $Var(e^U+e^{1−U})$, where $U \sim Uniform(0,1)$.
+What is the percent reduction in variance of $\hat{\theta}$ that can be
+achieved using antithetic variates (compared with simple MC)?
+
+**Solution.** 
+
+First, we can know that $\theta = e - 1 = 1.718282$ by
+integration. 
+Then under the assumption that $U \sim Un iform(0,1)$ and
+$(1-U) \sim Uniform(0,1)$ are identically distributed, we can derive
+that
+$$Var(e^U) =E[e^{2U}]-\theta^2=\dfrac{e^2-1}{2}-(e-1)^2=0.2420351 = Var(e^{1-U})$$
+
+As a result, we can calculate $Cov(e^U,e^{1−U})$ and $Var(e^U+e^{1−U})$
+as follows.
+
+$$
+\begin{aligned}
+\operatorname{Cov}\left(e^U, e^{1-U}\right) &=E\left[e^U e^{1-U}\right]-E\left[e^U\right] E\left[e^{(1-U)}\right] \\
+&=E\left[e\right] -(e-1)*(e-1)\\
+&=e-(e-1)^2 = -0.2342106 \\
+\operatorname{Var}\left(e^U+e^{1-U}\right)&=2 \operatorname{Var}\left(e^U\right)+2 \operatorname{Cov}\left(e^U, e^{1-U}\right) \\
+&=2\left(\frac{1}{2}\left(e^2-1\right)-(e-1)^2+e-(e-1)^2\right)
+\end{aligned}
+$$
+
+**For simple MC:** 
+
+Suppose $\hat{\theta}_1$ is the simple MC estimator.
+If the simple Monte Carlo approach is applied with m replicates, the
+variance of the estimator is $$
+    Var(\hat\theta_1 ) = \dfrac{1}{m}Var(e^U) =\frac{1}{m}\{ \frac{1}{2}\left(e^2-1\right)-(e-1)^2\}
+    $$
+
+**For antithetic variates MC:**
+
+Suppose $\hat{\theta}_2$ is the antithetic estimator.If antithetic
+variable approach is applied with $m/2$ replicates, the variance of the
+estimator is
+
+$$
+\begin{aligned}
+\operatorname{Var}(\hat\theta_2)&=
+\dfrac{1}{m/2} \operatorname{Var} \left( \frac{1}{2} \left( e^U+e^{1-U} \right) \right)\\
+&= \frac{1}{m} \left( \frac{1}{2}\left( e^2-1 \right)-(e-1)^2+e-(e-1)^2 \right) 
+\end{aligned}
+$$
+
+So the reduction in variance is
+
+$$
+\frac{\operatorname{Var}\left(\hat{\theta}_1\right)-\operatorname{Var}\left(\hat{\theta}_2\right)}{\operatorname{Var}\left(\hat{\theta}_1\right)} =  0.9676701
+$$
+
+```{r}
+# the caculation process
+v1 = 0.5*(exp(2)-1)-(exp(1)-1)**2
+v2 = 0.5*(exp(2)-1)-(exp(1)-1)**2 + exp(1) - (exp(1)-1)**2
+(r = (v1-v2)/(v1))
+```
+
+In other words, we can say that the reduction in variance is 96.767%.
+
+[Back to the Question](#question)
+
+### Exercise 5.7 {#question3ans}
+
+**Problem.** 
+
+Refer to Exercise 5.6. Use a Monte Carlo simulation to
+estimate $\theta$ by the antithetic variate approach and by the
+simple Monte Carlo method. Compute an empirical estimate of the percent
+reduction in variance using the antithetic variate. Compare the result
+with the theoretical value from Exercise 5.6.
+
+**Solution.**
+
+According to the analysis in Exercise 5.6, we can give a
+simulation by the program flow chart below.
+
+  + 1. Specify m, the number of simulations;
+  + 2. Generate random numbers $X_1,\cdots,X_m$ from the uniform distrubution $U(0,1)$;
+  + 3. Generate random numbers $Y_1,\cdots,Y_{m/2}$ from the uniform distrubution $U(0,1)$,and calucate $Z_i = 1 - Y_i$ for $i = 1,\cdots,m/2$;
+  + 4. Caculate
+  
+      $$\hat\theta_1 = \dfrac{1}{m} \sum_{i=1}^{m} e^{X_i}$$
+      $$\hat\theta_2 = \dfrac{1}{m} \sum_{i=1}^{m/2} (e^{X_i}+e^{Z_i})$$
+  + 5. Output result $\hat\theta_1,\hat\theta_2$, calculate their variances and the percent reduction.
+  
+The code is shown below.
+
+```{r}
+set.seed(100)
+MC.Phi <- function(x, R = 10000, antithetic = FALSE) {
+  u <- runif(R/2)
+  if (antithetic) v <- 1 - u else v <- runif(R/2)
+  u <- c(u, v)
+  g <- exp(u) # x*u ~ N(0,x)
+  cdf <- mean(g) 
+  cdf
+}
+m <- 10000
+MC1 <- MC2 <- numeric(m)
+x <- 1
+for (i in 1:m) {
+  MC1[i] <- MC.Phi(x, R = m, antithetic = FALSE)
+  MC2[i] <- MC.Phi(x, R = m, antithetic = TRUE)
+}
+round(c(var(MC1),var(MC2),(var(MC1)-var(MC2))/var(MC1)),5)
+```
+
+The empirical estimate of the percent reduction on variance using the antithetic variate is 96.837% which is almost equal to the theoretical value 96.767% we get from [Exercise 5.6](#question2ans).
+
+[Back to the Question](#question)
+
+# HW10: "A-22015-2022-11-18"
+
+## Question {#question}
+
+1.  Exercises 1 (page 204, Advanced R) [Jump to the Answer](#question1ans)
+
+2.  Exercises 2 (page 213, Advanced R) [Jump to the Answer](#question2ans)
+
+3.  Exercises 3 (Rcpp function) [Jump to the Answer](#question3ans)
+
+
+## Answer
+
+
+### Exercise 1 {#question1ans}
+
+**Problem.** 
+
+The function below scales a vector so it falls in the range [0, 1]. How would you apply it to every column of a data frame? How would you apply it to every numeric column in a data frame?
+
+```{r}
+scale01 = function(x) {
+         rng = range(x, na.rm = TRUE) #logical, indicating if NA's should be omitted.
+         (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+**Solution.** 
+
+Since this function needs numeric input, error will appear if we apply the function above to dataframe with different types. So we can use if() “function” like the code and explaniation below.
+
+```{r}
+# At first, we create a dataframe with numeric columns only
+data_numeric = data.frame(matrix(data = 1:10,nrow=5,ncol=2))
+# Correct values arrive if we apply the scale01 function directly
+data.frame(lapply(data_numeric, function(x) scale01(x)))
+```
+```{r}
+# Then, we create a dataframe with different types of values 
+data_types = data.frame(a = c(1,2,3),b = c(TRUE,FALSE,FALSE), c = c("1","2","3"))
+# Error will appear if we apply the function above 
+# lapply(data, function(x) scale01(x))
+# So we can utilize the function if
+data.frame(lapply(data_types, function(x) if (is.numeric(x)) scale01(x) else x))
+```
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+[Back to the Question](#question)
+
+### Exercise 2 {#question2ans}
+<font size=4.5>
+**Problem.**
+
+1. Use vapply() to:
+
+a) Compute the standard deviation of every column in a numeric data frame.
+
+b) Compute the standard deviation of every numeric column in a mixed data frame. (Hint: you’ll need to use vapply() twice.)
+
+**Solution.** 
+
+(a):
+
+```{r}
+deviation = function(data){ 
+  # data should be the form of numeric data frame
+  # vapply is similar to sapply, but has a pre-specified type of return value, so it can be safer (and sometimes faster) to use.
+  a = vapply(data,FUN = function(x) sd(x),numeric(1))
+  return(data.frame(a))
+}
+data_numeric = data.frame(matrix(data = 1:10,nrow=5,ncol=2))
+deviation(data_numeric)
+```
+
+(b):
+
+```{r}
+deviation_mix = function(data){ 
+  # data is  a mixed data frame
+  data = data[vapply(data,FUN = is.numeric,logical(1))]
+  a = vapply(data,FUN = function(x) sd(x),numeric(1))
+  return(data.frame(a))
+}
+# Then, we create a dataframe with different types of values 
+data_types = data.frame(a = c(1,2,3),b = c(TRUE,FALSE,FALSE), c = c("1","2","3"))
+deviation_mix(data_types)
+```
+
+
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+
+
+[Back to the Question](#question)
+
+
+### Exercise 3 {#question3ans}
+<font size=4.5>
+**Problem.**
+
+ Implement a Gibbs sampler to generate a bivariate normal chain $(X_t,Y_t)$ with zero means, unit standard deviations, and correlation 0.9.
+ 
+- Write an Rcpp function.
+
+- Compare the corresponding generated random numbers with pure R language using the function “qqplot”.
+
+-  Compare the computation time of the two functions with the function “microbenchmark”.
+
+**Solution.** 
+
+
+The target distribution is bivariate normal: $(X,Y)\sim N(\mu_1,\mu_2,\sigma^2_1,\sigma_2^2,\rho)$.
+
+And the conditional distributions $f(x|y)$ and $f(y|x)$ are: 
+    $$(x|y)\sim N(\mu_1+\rho\sigma_1/\sigma_2(y-\mu_2),(1-\rho^2)\sigma_1^2),$$
+    $$(y|x)\sim N(\mu_2+\rho\sigma_2/\sigma_1(x-\mu_1),(1-\rho^2)\sigma_2^2).$$
+
+* For $t=1,\ldots,T$
+    + 1. Sets $(x,y)=Z(t-1)$;
+    + 2. Generates $X^*(t)$ from $f(\cdot|y)$;
+    + 3. Updates $x=X^*(t)$;
+    + 4. Generates $X^*(t)$ from $f(\cdot|x)$;
+    + 5. Sets $X(t)=(X^*(t),Y^*(t))$.
+* End for
+
+We set length of chain: $N=10000$,$\mu_1=0,\mu_2=0$,$\sigma_1^2=1$, $\sigma^2_2=1$, $\rho=0.9$,$thin = 10$.
+
+Code using C++ and R to generate random numbers is as follows.
+
+
+
+```{r}
+# library("Rcpp")
+# source('gibbsR.R')
+# sourceCpp('gibbsC.cpp')
+# add
+library(StatComp22015)
+set.seed(22015)
+gibbC = gibbsC(10000,10,1,0,0,1,1,0.9)
+gibbR = gibbsR(10000,10,1,0,0,1,1,0.9)
+```
+
+
+if we set $\boldsymbol{z}=(X,Y)$, then 
+$$
+\boldsymbol{z} \sim N_2(\boldsymbol{\mu},\boldsymbol{\Sigma})\\
+\boldsymbol{\mu}=\left(\begin{array}{c}\mu_X \\ \mu_Y\end{array}\right), 
+\quad 
+\boldsymbol{\Sigma}=\left(\begin{array}{cc}\sigma_X^2 & \rho \sigma_X \sigma_Y \\ \rho \sigma_X \sigma_Y & \sigma_Y^2\end{array}\right)
+$$
+and
+$$
+(\boldsymbol{x}  - \boldsymbol{\mu})^{\prime} \boldsymbol{\Sigma}^{-1} (\boldsymbol{x}  - \boldsymbol{\mu}) \sim \chi^2(2)
+$$
+The mle estimators are:
+
+$$\hat{\boldsymbol{\mu}}=\overline{\boldsymbol{x}}=\frac{1}{n} \sum_{i=1}^n \boldsymbol{x}_i$$
+$$\hat{\boldsymbol{\Sigma}}=\frac{1}{n} \sum_{i=1}^n\left(\boldsymbol{x}_i-\overline{\boldsymbol{x}}\right)\left(\boldsymbol{x}_i-\overline{\boldsymbol{x}}\right)^{\prime}$$
+
+Using the Mahalanobis distance, we can use qqplot as follows.
+
+```{r,fig.align='center'}
+chi_R = mahalanobis(gibbR,colMeans(gibbR),cov(gibbR))
+chi_C = mahalanobis(gibbC,colMeans(gibbC),cov(gibbC))
+qqplot(chi_R,chi_C,main = expression("Q-Q plot of Mahalanobis" * ~chi_R *
+                         " vs" * ~ chi_C))
+abline(0, 1, col = 'gray')
+```
+
+We can see that the points almost coincides with the line.
+
+Then we can compare the computation time of the two functions with the function “microbenchmark”.
+
+```{r}
+library(microbenchmark)
+# Compare the computation time of the two functions with the function “microbenchmark”.
+ts = microbenchmark(gibbR = gibbsR(10000,10,1,0,0,1,1,0.9), gibbC = gibbsC(10000,10,1,0,0,1,1,0.9))
+summary(ts)[,c(1,3,5,6)]
+```
+
+We can see that gibbC using C++ is faster than the R itself.
+
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+
+
+
+[Back to the Question](#question)
 
 

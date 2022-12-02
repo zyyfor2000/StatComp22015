@@ -142,3 +142,38 @@ knitr::kable(summary(tm1)[,c(1,3,5,6)])
 ```
 
 The results again show an evident computational speed gain of C++ against R.
+
+
+## the graph illustration of my simulation result 
+
+
+To reproduce the code in papar called A general method for addressing forecasting uncertainty in inventory models, I make a visual display as follows.
+
+```{r,echo=FALSE}
+#导入结果
+result = array(data = 0, dim = c(10,4,9))
+for (i in 1:10){
+  a = read.table(paste("../data/text",i,".txt",sep = ""))
+  a = a[,c(2,1,3,4,5,6,7,8,9)]
+  result[i,,] = as.matrix(a)
+}
+
+```
+
+
+```{r}
+plot_s(1,result)
+```
+
+```{r}
+plot_s(2,result)
+```
+
+```{r}
+plot_s(3,result)
+```
+
+```{r}
+plot_s(4,result)
+```
+

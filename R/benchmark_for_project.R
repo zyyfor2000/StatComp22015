@@ -17,6 +17,7 @@
 #' @import EnvStats
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats rnorm rgamma runif dt mahalanobis
+#' @importFrom graphics axis legend lines par
 #' @useDynLib StatComp22015
 NULL
 

@@ -273,20 +273,20 @@ rm(list = ls() )
 
 # HW2: "A-22015-2022-09-23"
 
-## Question {#question}
+## Question {#question2}
 
 1.  Exercises 1 (About fast sorting algorithm). [Jump to the
-    Answer](#question1ans)
+    Answer](#question1ans2)
 
 2.  Exercises 5.6 (Page 150, Statistical Computing with R). [Jump to the
-    Answer](#question2ans)
+    Answer](#question2ans2)
 
 3.  Exercises 5.7 (Page 150, Statistical Computing with R). [Jump to the
-    Answer](#question3ans)
+    Answer](#question3ans2)
 
 ## Answer
 
-### Exercise 1 {#question1ans}
+### Exercise 1 {#question1ans2}
 <font size=4.5>
 **Problem.**
 
@@ -358,9 +358,9 @@ abline(lm(a~t),col='red')
 
 It can be shown that regression line well fit the scatter plot.
 
-[Back to the Question](#question)
+[Back to the Question](#question2)
 
-### Exercise 5.6 {#question2ans}
+### Exercise 5.6 {#question2ans2}
 
 **Problem.** 
 
@@ -431,9 +431,10 @@ v2 = 0.5*(exp(2)-1)-(exp(1)-1)**2 + exp(1) - (exp(1)-1)**2
 
 In other words, we can say that the reduction in variance is 96.767%.
 
-[Back to the Question](#question)
+[Back to the Question](#question2)
 
-### Exercise 5.7 {#question3ans}
+
+### Exercise 5.7 {#question3ans2}
 
 **Problem.** 
 
@@ -479,25 +480,379 @@ for (i in 1:m) {
 round(c(var(MC1),var(MC2),(var(MC1)-var(MC2))/var(MC1)),5)
 ```
 
-The empirical estimate of the percent reduction on variance using the antithetic variate is 96.837% which is almost equal to the theoretical value 96.767% we get from [Exercise 5.6](#question2ans).
+The empirical estimate of the percent reduction on variance using the antithetic variate is 96.837% which is almost equal to the theoretical value 96.767% we get from [Exercise 5.6](#question2ans2).
+
+[Back to the Question](#question2)
+
+# HW3: "A-22015-2022-09-30"
+
+## Question {#question3}
+
+1.  Exercises 5.13 (Page 151, Statistical Computing with R). [Jump to
+    the Answer](#question1ans3)
+
+2.  Exercises 5.15 (Page 151, Statistical Computing with R). [Jump to
+    the Answer](#question2ans3)
+
+## Answer
+
+### Exercise 5.13 {#question1ans3}
+
+<font size=4.5> **Problem.**
+
+Find two importance functions $f_1$ and $f_2$ that are supported on
+$(1, \infty)$ and are 'close' to $$
+g(x)=\frac{x^2}{\sqrt{2 \pi}} e^{-x^2 / 2}, \quad x>1 .
+$$ Which of your two importance functions should produce the smaller
+variance in estimating $$
+\int_1^{\infty} \frac{x^2}{\sqrt{2 \pi}} e^{-x^2 / 2} d x
+$$ by importance sampling? Explain.
+
+**Solution.**
+
+Firstly, according to the formula of $g(x)$,I let
+$f_1 = \frac{1}{\sqrt{2\pi}}e^{-(x-1)^2/2}$ and
+$f_2 = \frac{1}{\Gamma(3)}x^{3-1}e^{-x}$.Then I display the graph of
+$g(x), f_1(x),f_2(x)$. From the graph below, we can see the two
+importance functions $f_1$ and $f_2$ that are supported on $(1, \infty)$
+are 'close' to $g(x)$.
+
+```{r,fig.align='center'}
+x <- seq(1, 20, 0.01)
+y <- x^2 * exp(-x^2/2)/sqrt(2 * pi)
+plot(x, y, type = "l", ylim = c(0, 1))
+lines(x, dnorm(x,mean = 1), lty = 2)
+lines(x, dgamma(x,shape = 3,scale = 1), lty = 3)
+legend("topright", legend = c("g(x)", "f1", "f2"), lty = 1:3)
+
+```
+
+Secondly, we will compare the ratios $g(x)/f(x)$ to know which of my two
+importance functions should produce the smaller variance in estimating
+$$
+\int_1^{\infty} \frac{x^2}{\sqrt{2 \pi}} e^{-x^2 / 2} d x
+$$ .
+
+From the results below, we may prefer to think that  $f_1$  will produce
+smaller variance in estimating, because the ratio $g(x)/f(x)$ is closer
+to a constant function.
+
+```{r,fig.align='center'}
+plot(x, y/(dnorm(x,mean=1)), type = "l", lty = 3, ylab = "")
+lines(x, y/(dgamma(x,shape = 3,scale = 1)), lty = 2)
+legend("topright", inset = 0.02, legend = c("g/f1", "g/f2"),
+lty = 2:3)
+```
+
+Last but not least, we will do the simulation to check whether we have
+the right intuition and answers in step2. It seems that what we derive
+is correct in step2 because estimated standard error produced by $f_2$ is larger than $f_1$.
+
+```{r}
+set.seed(22015)
+m = 1e6
+est = sd <- numeric(2)
+g = function(x) {
+x^2 * exp(-x^2/2)/sqrt(2 * pi) * (x > 0)
+}
+x = rnorm(m,mean=1) #using f1
+fg = g(x)/dnorm(x,mean=1)
+est[1] = mean(fg)
+sd[1] = sd(fg)
+x = rgamma(m,shape = 3,scale = 1) #using f2
+fg = g(x)/dgamma(x,shape = 3,scale = 1)
+est[2] = mean(fg)
+sd[2] = sd(fg)
+rbind(est,sd)
+```
+
+- Mark:  We can get actual answer by the code below. The result from
+neither $f_1$ nor $f_2$ is close enough to the true value 0.400626. So I think
+both of my choices are not good enough and this method deserves to be
+examined by many times.
+
+```{r}
+I.int <- integrate(function(x) x^2*dnorm(x), 1, Inf)
+(I.int$value)
+```
 
 [Back to the Question](#question)
 
+### Exercise 5.15 {#question2ans3}
+
+**Problem.**
+
+Obtain the stratified importance sampling estimate in Example 5.13 and
+compare it with the result of Example 5.10.
+
+Example 5.13 (Example 5.10, cont.) In Example $5.10$ our best result was
+obtained with importance function $f_3(x)=$
+$e^{-x} /\left(1-e^{-1}\right), 0<x<1$. From 10000 replicates we
+obtained the estimate $\hat{\theta}=0.5257801$ and an estimated standard
+error $0.0970314$. Now divide the interval $(0,1)$ into five
+subintervals, $((j-1) / 5,j / 5), j=,1, \ldots, 5$. Then on the
+$j^{\text {th }}$ subinterval variables are generated from the density
+$$
+\frac{5 e^{-x}}{1-e^{-1}}, \quad \frac{j-1}{5}<x<\frac{j}{5} .
+$$ The implementation is left as an exercise.
+
+**Solution.**
+
+To make a preparation, if a random variable $X$ has a density $f_3$, it has a distribution function $F(X)=\dfrac{1-e^{x}}{1-e^{-1}}$, then we can use the inverse transform method in the code below.
+
+```{r}
+set.seed(22015)
+M = 10000  # number of replicates
+k = 5 # number of strata
+r = M/k # replicates per strata
+# the original function
+g = function(x){
+  exp(-x)/(1+x^2)*(x>0)*(x<1)
+}
+# changed f3 on subinterval
+f = function(x){
+  exp(-x)/(1-exp(-1))
+}
+# create vectors involving estimated theta and varaince
+theta = numeric(k)
+var = numeric(k)
+sd = numeric(k) #try to see if it is equal to sqrt(var)
+for (i in 1:k){
+  u = runif(r, (i-1)/k,i/k)
+  x = -log(1-(1-exp(-1))*u) #use inverse transform method,of course it is not，because var(sum(theta_i)) = sum(var(theta_i)),se无此性质.
+  gf = g(x)/f(x)
+  theta[i] = mean(gf)
+  var[i] = var(gf)
+  sd[i] = sd(gf)
+}
+# 原
+(sum(theta))
+(sqrt(sum(var)))
+(sum(sd))
+# 改
+(mean(theta))
+(mean(var))
+```
+
+As a result, we can make a conclusion from the result that by using the stratified importance sampling，with total 10000 replicates we
+obtained the estimate $\hat{\theta}=0.5251917$ which is close to the result in Example $5.10$ and an estimated standard
+error $0.004213689$ which is far less than $0.0970314$ in Example $5.10$ . 
+
+[Back to the Question](#question3)
+
+# HW4: "A-22015-2022-10-09"
+
+## Question {#question4}
+
+1.  Exercises 6.4 (pages 180-181, Statistical Computing with R). [Jump to the
+    Answer](#question1ans4)
+
+2.  Exercises 6.8 (pages 180-181, Statistical Computing with R). [Jump to the
+    Answer](#question2ans4)
+    
+3.  Exercises 3 (About hypothesis test problem). [Jump to the
+    Answer](#question3ans4)
+
+
+## Answer
+
+### Exercise 6.4 {#question1ans4}
+<font size=4.5>
+**Problem.**
+
+Suppose that $X_1, . . . , X_n$ are a random sample from a from a lognormal distribution with unknown parameters. Construct a 95% confidence interval for the parameter $\mu$. Use a Monte Carlo method to obtain an empirical estimate of the confidence level.
+
+
+**Solution.** 
+
+Suppose $X$ is a random variable that satisfies $Y = In(X)\sim N(\mu,\sigma^2)$.So we choose tests statistic $T=\dfrac{\bar{Y}-\mu}{s/\sqrt{n}}\sim t(n-1)$ and 95% CI of $\mu$ takes the form 
+$$(\hat\mu-t_{(n-1)}(0.975)\hat{\sigma}/\sqrt{n},\hat\mu+t_{(n-1)}(0.975)\hat{\sigma})/\sqrt{n})$$.
+By setting $\mu = 10,\sigma^2 = 4,n=20$,we can use a Monte Carlo method to obtain an empirical estimate of the confidence level 95% as the codes below.
+
+```{r}
+set.seed(0)
+# data generation
+generate = function(mu = 10,sigma.2 = 4,m = 1e5,n = 20){
+  mu.hat = numeric(m)
+  se.hat = numeric(m)
+  for (i in 1:m){
+  x = rlnorm(n)
+  y = log(x)
+  mu.hat[i] = mean(y)
+  se.hat[i] = sd(y)/sqrt(n)
+  }
+  result = data.frame(mu.hat,se.hat,n)
+  result
+}
+# data analysis
+analysis = function(mu.hat,se.hat,n){
+  p.val = 2*(1-pt(abs(mu.hat/se.hat),n-1))
+  p.val
+}
+# data report
+report = function(p.val){
+  (1-mean(p.val<0.05))
+}
+
+# main procedure
+result = generate(mu = 10,sigma.2 = 4,m = 1e5,n = 20)
+gc()# memory is cleared up before calling each other
+p.val = analysis(result$mu.hat,result$se.hat,result$n)
+gc()# memory is cleared up before calling each other
+report(p.val)
+```
+
+We can see from the result that 0.04876 is close to 0.05. 
+
+
+[Back to the Question](#question4)
+
+### Exercise 6.8 {#question2ans4}
+
+**Problem.** 
+
+Refer to Example 6.16. Repeat the simulation, but also compute the F test of equal variance, at significance level $\hat\alpha \approx 0.055$.Compare the power of the Count Five test and F test for small, medium, and large sample sizes. (Recall that the F test is not applicable for non-normal distributions.)
+
+
+
+**Solution.** 
+
+- The two sample "Count Five" test:
+
+  To test the equality of variance, we need to count the number of extreme points of each sample relative to the range of the other sample. Suppose the means of the two samples are equal and sample sizes are equal. An observation in one example is considered extreme if it is not within the range of the other sample. If either sample has five or more extreme points, the hypothesis of equal variance is rejected.
+
+- Example 6.16:
+
+  Use Monte Carlo methods to estimate the power of the Count Five test, where the sampled distributions are $N\left(\mu_1=0, \sigma_1^2=1\right), N\left(\mu_2=0, \sigma_2^2=1.5^2\right)$, and the sample sizes are $n_1=n_2=20$.
+
+- F test of equal variance, at significance level $\hat\alpha \approx 0.055$
+
+  We can choose tests statistic $F=\dfrac{s_1^2}{s_2^2}\sim F(n_1,n_2)$ to establish our CI. `var.test` is easy to be used.
+
+```{r}
+count5test = function(x,y){
+  X = x - mean(x)
+  Y = y - mean(y)
+  outx = sum(X > max(Y)) + sum(X < min(Y))
+  outy = sum(Y > max(X)) + sum(Y < min(X))
+  return(as.integer(max(c(outx,outy))>5)) #return 1 (reject) or 0 (do not reject H0)
+}
+set.seed(22015)
+# data generation
+generation = function(m,n,mu,sigma1,sigma2){
+  data = array(data=0,dim=c(n,2,m))
+    for (i in 1:m){
+    x = rnorm(n, mu, sigma1)
+    y = rnorm(n, mu, sigma2)
+   data[,,i] = cbind(x,y)
+    }
+  data
+}
+# data anlysis
+analysis = function(data,m){
+  power1 = numeric(m)
+  power2 = numeric(m)
+ for (i in 1:m){
+   power1[i] = count5test(data[,1,i],data[,2,i])
+   power2[i] = as.integer(var.test(data[,1,i],data[,2,i])$p.value <=0.055)
+ }
+  power = cbind(power1,power2)
+  power
+}
+# data report
+report = function(power){
+  print(apply(power,2,mean))
+}
+
+# main procedure
+for (n in c(5,10,20,50,100,200,500,1000)){
+  data = generation(1e4,n,0,1,1.5)
+  gc()
+  power = analysis(data,1e4)
+  gc()
+  print(n)
+  report(power)
+}
+```
+
+The results above illustrates that the power from F-test is bigger than that from "Count Five" test which indicates that F-test is more powerful.
+
+[Back to the Question](#question4)
+
+### Exercise 3 {#question3ans4}
+
+**Problem.** 
+
++ If we obtain the powers for two methods under a particular simulation setting with 10,000 experiments: say, 0.651 for one method and 0.676 for another method. Can we say the powers are different at 0.05 level?
+        
+  +   What is the corresponding hypothesis test problem?
+        
+  +   Which test can we use? Z-test, two-sample t-test, paired-t test or McNemar test? Why?
+        
+  +   Please provide the least necessary information for hypothesis testing.
+        
+
+**Solution.**
+
+First, the corresponding hypothesis test problem is $H_0 : p_1 = p_2$,$H_1:p_1 \neq  p_2$.
+
+Second, we can use the Z-test because our aim is to compare whether the powers is significantly different. As there have been 10000 experiments, it is valid to assume the power is normal with unknown parameters.
+
+We know that $n\bar{p_1} \sim B(n,p_1),n\bar{p_2} \sim B(n,p_2)$.
+And under the situation where n equals 10000, we can deduce that
+$$
+\bar{p_1}-\bar{p_2} \sim \dfrac{(\bar{p_1}-\bar{p_2})-(p_1-p_2)}{\sqrt{\dfrac{\sigma_1^2+\sigma_2^2}{n}}}
+\\
+\sigma_1^2 = p_1(1 -p_1),\sigma_2^2 = p_2(1 -p_2)
+$$.
+
+So let $p = p_1-p_2$, the hypothesis test problem changes to $H_0 : p = 0$,$H_1:p \neq 0$. The tests statistic is 
+$$
+z= \dfrac{\bar{p_1}-\bar{p_2}}{\sqrt{\dfrac{2*\hat\sigma^2}{n}}}
+\\
+\hat \sigma^2 = \hat p(1 -\hat p),
+\hat p = \dfrac{\bar{p_1} + \bar{p_2}}{2}
+$$
+.
+
+As a result, under the assuption where $X\sim N(0,1)$,if $2P(x>|z|)\leq 0.05$, we reject the null hypothesis,else we accept the null  hypothesis.
+
+We can  test as follows.
+
+```{r}
+p1_hat = 0.651
+p2_hat = 0.676
+n = 10000
+sigma_2_hat = (p1_hat+p2_hat)/2*(1-(p1_hat+p2_hat)/2)
+z = (p1_hat-p2_hat)/sqrt(2*sigma_2_hat/n)
+2*(1-pnorm(abs(z)))
+```
+
+The p-value equals to 0.0001831369 < 0.05 which indicates  we should reject the null hypothesis. We can say the powers are different at 0.05 level.
+
+
+
+  
+
+
+[Back to the Question](#question4)
+
+
 # HW10: "A-22015-2022-11-18"
 
-## Question {#question}
+## Question {#question10}
 
-1.  Exercises 1 (page 204, Advanced R) [Jump to the Answer](#question1ans)
+1.  Exercises 1 (page 204, Advanced R) [Jump to the Answer](#question1ans10)
 
-2.  Exercises 2 (page 213, Advanced R) [Jump to the Answer](#question2ans)
+2.  Exercises 2 (page 213, Advanced R) [Jump to the Answer](#question2ans10)
 
-3.  Exercises 3 (Rcpp function) [Jump to the Answer](#question3ans)
+3.  Exercises 3 (Rcpp function) [Jump to the Answer](#question3ans10)
 
 
 ## Answer
 
 
-### Exercise 1 {#question1ans}
+### Exercise 1 {#question1ans10}
 
 **Problem.** 
 
@@ -535,9 +890,9 @@ Finally, we clean the memory of the variables.
 rm(list = ls())
 ```
 
-[Back to the Question](#question)
+[Back to the Question](#question10)
 
-### Exercise 2 {#question2ans}
+### Exercise 2 {#question2ans10}
 <font size=4.5>
 **Problem.**
 
@@ -585,10 +940,10 @@ rm(list = ls() )
 
 
 
-[Back to the Question](#question)
+[Back to the Question](#question10)
 
 
-### Exercise 3 {#question3ans}
+### Exercise 3 {#question3ans10}
 <font size=4.5>
 **Problem.**
 
@@ -683,6 +1038,5 @@ rm(list = ls() )
 
 
 
-[Back to the Question](#question)
-
+[Back to the Question](#question10)
 

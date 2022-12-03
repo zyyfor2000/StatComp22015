@@ -253,8 +253,8 @@ Through the discussion in the  first section, then we can  derive theoretical (P
 The pdf function is $$f(y)=\beta^\gamma\gamma(\beta+y)^{-r-1},y\geq0$$
 The results are listed as follows.
 
-```{r, fig.align='center'}
-library(EnvStats)
+```{r, fig.align='center',eval=FALSE}
+# library(EnvStats)
 hist(x,probability = TRUE, main = expression(f(x)==beta^{gamma}*gamma*(beta+x)^{-r-1},y >= 0))
 y = seq(0,6,0.01)
 z = seq(b,6+b,0.01)
@@ -836,6 +836,1335 @@ The p-value equals to 0.0001831369 < 0.05 which indicates  we should reject the 
 
 
 [Back to the Question](#question4)
+
+
+# HW5: "A-22015-2022-10-14"
+
+## Question {#question5}
+
+1.  Exercises 7.4 (pages 212-213, Statistical Computing with R). [Jump to the
+    Answer](#question1ans5)
+
+2.  Exercises 7.5 (pages 212-213, Statistical Computing with R). [Jump to the
+    Answer](#question2ans5)
+    
+3.  Exercises 7.A (pages 212-213, Statistical Computing with R). [Jump to the
+    Answer](#question3ans5)
+
+
+## Answer
+
+### Exercise 7.4 {#question1ans5}
+<font size=4.5>
+**Problem.**
+
+Refer to the air-conditioning data set aircondit provided in the boot package. The 12 observations are the times in hours between failures of air-conditioning equipment [63, Example 1.1]:
+
+3, 5, 7, 18, 43, 85, 91, 98, 100, 130, 230, 487.
+
+Assume that the times between failures follow an exponential model $Exp(\lambda)$. Obtain the MLE of the hazard rate $\lambda$ and use bootstrap to estimate the bias and standard error of the estimate.
+
+
+**Solution.** 
+
+The times in hours between failures of air-conditioning equipment is denoted by $X$, and $X \sim Exp(\lambda)$. So we can derive that the MLE of $\lambda$ is $\dfrac{1}{\bar{x}}$ and use bootstap to estimate the bias and standard error of the estimate as the code below.
+
+
+```{r}
+set.seed(22015)
+library(boot)
+data = aircondit$hours
+# method 1
+lambda.mle = 1/mean(data)
+B = 1e3
+lambda_estimate = numeric(B)
+for (b in 1:B){
+  data_sub = sample(data,replace = TRUE)
+  lambda_estimate[b] = 1/mean(data_sub)
+}
+round(c(lambda.mle=lambda.mle,bias=mean(lambda_estimate)-lambda.mle,se.boot = sd(lambda_estimate)),3)
+# method 2
+lambda <- function(x, i) return(1/mean(x[i]) )
+obj = boot(data, statistic = lambda, R = B)
+round(c(lambda.mle = obj$t0, bias = mean(obj$t)- obj$t0, se.boot = sd(obj$t)),3)
+```
+
+From the results above, we can see that not only the bias but also and standard error of the estimate  is very small.
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+
+
+[Back to the Question](#question5)
+
+### Exercise 7.5 {#question2ans5}
+
+**Problem.** 
+
+Refer to Exercise 7.4. Compute 95% bootstrap confidence intervals for the mean time between failures $1/\lambda$ by the standard normal, basic, percentile, and BCa methods. Compare the intervals and explain why they may differ.
+
+
+
+**Solution.** 
+
+
+
+```{r}
+set.seed(22015)
+data = aircondit$hours
+lambda.inverse = function(x,i) mean(x[i])
+de = boot(data = data,statistic = lambda.inverse,R=10000)
+ci = boot.ci(de, type = c("norm", "perc", "basic", "bca"))
+knitr::kable(data.frame("type"=c("norm", "perc", "basic", "bca"),
+                      "ci_left"=c(ci$norm[2],ci$percent[4],ci$basic[4],ci$bca[4]),
+                      "ci_right"=c(ci$norm[3],ci$percent[5],ci$basic[5],ci$bca[5])))
+```
+
+
+```{r,fig.align='center'}
+hist(de$t, prob = TRUE, main = "") 
+points(de$t0, 0, cex = 3, pch = 20)
+```
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+To apply the normal distribution, we assume that the distribution of $1/\hat\lambda$ is normal or  $1/\hat\lambda$ is a sample mean and the sample size is large. From the conditions above, we can know the reason why the normal and percentile intervals differ.
+
+From the histogram of replicates, it appears that the distribution of the replicates is skewed. The BCa  interval is different because it adjusts for both skewness and bias.
+
+
+[Back to the Question](#question5)
+
+### Exercise 7.A {#question3ans5}
+
+**Problem.** 
+
+Conduct a Monte Carlo study to estimate the coverage probabilities of the standard normal bootstrap confidence interval, the basic bootstrap confidence interval, and the percentile confidence interval. Sample from a normal population and check the empirical coverage rates for the sample mean. Find the proportion of times that the confidence intervals miss on the left, and the porportion of times that the confidence intervals miss on the right.
+
+
+**Solution.**
+
+We assume that $X\sim N(0,1)$, $x_1,x_2,\cdots,x_n$ is a sample from $X$ where $n = 20$. We check the empirical coverage rates for the sample mean by using the standard normal bootstrap confidence interval, the basic bootstrap confidence interval, and the percentile confidence interval in which the whole times equal to 10000. Finally,we calculate the proportion of times that the confidence intervals miss on the left, and the porportion of times that the confidence intervals miss on the right.
+
+```{r}
+set.seed(22015)
+mu =0; sigma = 1
+n = 20; m = 10000
+boot.mean = function(x,i) mean(x[i])
+ci.norm = ci.basic = ci.perc = matrix(NA,m,2)
+for(i in 1:m){
+  data = rnorm(n,mean = mu,sd = sigma)
+  de = boot(data = data,statistic = boot.mean,R=999)
+  ci = boot.ci(de,type = c("norm","basic","perc"))
+  ci.norm[i,] = ci$norm[2:3]
+  ci.basic[i,] = ci$basic[4:5]
+  ci.perc[i,] = ci$percent[4:5]
+}
+
+knitr::kable(data.frame("type"=c("norm","basic","perc"),
+                      "empirical coverage rates"=
+                        c(mean(ci.norm[,1]<=mu & ci.norm[,2]>=mu),
+                          mean(ci.basic[,1]<=mu & ci.basic[,2]>=mu),
+                          mean(ci.perc[,1]<=mu & ci.basic[,2]>=mu)),
+                      "p_miss_on_left"=c(mean(ci.norm[,1]>mu),
+                                         mean(ci.basic[,1]>mu),
+                                         mean(ci.perc[,1]>mu)),
+                      "p_miss_on_right"=c(mean(ci.norm[,2]<mu),
+                                        mean(ci.basic[,2]<mu),
+                                        mean(ci.perc[,2]<mu))))
+```
+
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+Oboviously from the result above we can see that the standard normal bootstrap gets the higher empirical coverage rates for the sample mean than the other methods because of the sample is from a normal population. And the proportion of times that the confidence intervals miss on the left is lower than that on the right in all three methods.
+
+[Back to the Question](#question5)
+
+# HW6: "A-22015-2022-10-21"
+
+## Question {#question6}
+
+1.  Exercises 7.8 (pages 212-213, Statistical Computing with R). [Jump to the
+    Answer](#question1ans6)
+
+2.  Exercises 7.11 (pages 212-213, Statistical Computing with R). [Jump to the
+    Answer](#question2ans6)
+    
+3.  Exercises 8.2 (pages 242, Statistical Computing with R). [Jump to the
+    Answer](#question3ans6)
+
+
+## Answer
+
+### Exercise 7.8 {#question1ans6}
+<font size=4.5>
+**Problem.**
+
+Refer to Exercise 7.7. Obtain the jackknife estimates of bias and standard error of $\hat\theta$.
+
+Exercise 7.7:Refer to Exercise 7.6. Efron and Tibshirani discuss the following example $[84$, Ch. 7]. The five-dimensional scores data have a $5 \times 5$ covariance matrix $\Sigma$, with positive eigenvalues $\lambda_1>\cdots>\lambda_5$. In principal components analysis,
+$$
+\theta=\frac{\lambda_1}{\sum_{j=1}^5 \lambda_j}
+$$
+measures the proportion of variance explained by the first principal component. Let $\hat{\lambda}_1>\cdots>\hat{\lambda}_5$ be the eigenvalues of $\hat{\Sigma}$, where $\hat{\Sigma}$ is the MLE of $\Sigma$. Compute the sample estimate
+$$
+\hat{\theta}=\frac{\hat{\lambda}_1}{\sum_{j=1}^5 \hat{\lambda}_j}
+$$
+
+of $\theta$
+
+
+**Solution.** 
+
+Fisrt, let's look at how the data is composed of.
+
+```{r}
+# data generation
+library(bootstrap)
+attach(scor)
+class(scor)
+data = as.matrix(scor)
+print(summary(data))
+```
+
+Then we use the formula below to estimate the $\hat\theta$, then
+obtain the jackknife estimates of bias and standard error of $\hat\theta$.
+
+```{r}
+set.seed(22015)
+jack_hat = function(data){
+  n = nrow(data)
+  theta.jack = numeric(n)
+  lambda.hat = eigen(cov(data))$values
+  theta.hat = lambda.hat[1]/sum(lambda.hat)
+  for (i in 1:n){
+    lambda.hat = eigen(cov(data[-i,]))$values
+    theta.jack[i] = lambda.hat[1]/sum(lambda.hat)
+  }
+  result = data.frame(theta.hat, theta.jack,n)
+}
+result = jack_hat(data)
+n = result$n[1]
+theta.hat = result$theta.hat[1]
+theta.jack = result$theta.jack
+bias.jack = (n - 1) * (mean(theta.jack) - theta.hat)
+se.jack = sqrt((n - 1)/n * mean((theta.jack - mean(theta.jack))^2))
+knitr::kable(data.frame("est" = theta.hat, "bias" = bias.jack, "se" = se.jack))
+```
+
+
+In a word. the jackknife estimate of bias of \hat\theta is 0.0010691 and the jackknife estimate of se is 0.0052823. 
+
+Finally, we clean the memory of the variables.
+
+```{r}
+detach(scor)
+detach(package:bootstrap)
+rm(list = ls())
+```
+
+
+
+
+[Back to the Question](#question6)
+
+### Exercise 7.11 {#question2ans6}
+
+**Problem.** 
+
+In Example 7.18, leave-one-out (n-fold) cross validation was used to select the best fitting model. Use leave-two-out cross validation to compare the models.
+
+
+**Solution.** 
+
+
+The proposed models for predicting magnetic measurement $(\mathrm{Y})$ from chemical measurement $(\mathrm{X})$ are:
+1. Linear: $Y=\beta_0+\beta_1 X+\varepsilon$.
+2. Quadratic: $Y=\beta_0+\beta_1 X+\beta_2 X^2+\varepsilon$.
+3. Exponential: $\log (Y)=\log \left(\beta_0\right)+\beta_1 X+\varepsilon$.
+4. $\log -\log : \log (Y)=\beta_0+\beta_1 \log (X)+\varepsilon$.
+
+```{r}
+set.seed(22015)
+library(DAAG)
+attach(ironslag)
+#Cross validation is applied to select a model in Example 7.17.
+n = length(magnetic) #in DAAG ironslag 
+N = choose(n,2) # the times need to calculate leave-two-out
+e1 = e2 = e3 = e4 = numeric(N)
+counter = 1 
+# fit models on leave-two-out samples 
+for (i in 1:n-1) 
+  for ( j in (i+1):n){
+      k = c(i,j)
+      y = magnetic[-k]
+      x = chemical[-k]
+      # model1
+      J1 = lm(y ~ x)
+      yhat1 = J1$coef[1] + J1$coef[2] * chemical[k] 
+      e1[counter] = sum((magnetic[k] - yhat1)**2)
+      # model2
+      J2 = lm(y ~ x + I(x^2))
+      yhat2 = J2$coef[1] + J2$coef[2] * chemical[k] + J2$coef[3] * chemical[k]^2
+      e2[counter] = sum((magnetic[k] - yhat2)**2)
+      # model3
+      J3 = lm(log(y) ~ x) 
+      logyhat3 = J3$coef[1] + J3$coef[2] *chemical[k]
+      yhat3 = exp(logyhat3) 
+      e3[counter] = sum((magnetic[k] - yhat3)**2)
+      # model4
+      J4 = lm(log(y) ~ log(x))
+      logyhat4 = J4$coef[1] + J4$coef[2] * log(chemical[k]) 
+      yhat4 = exp(logyhat4)
+      e4[counter] = sum((magnetic[k] - yhat4)**2)
+      counter = counter + 1
+}
+```
+
+The following estimates for prediction error are obtained from the leave-two-out cross validation.
+
+```{r}
+knitr::kable(data.frame("model1" = sum(e1)/N,"model2" = sum(e2)/N, "model3" = sum(e3)/N, "model4" = sum(e4)/N))
+```
+
+
+
+The quadratic model is  selected according to the minimum prediction error by leave-two-out cross-validation.
+
+
+```{r,fig.align='center'}
+a = seq(10, 40, .1) #sequence for plotting fits
+L2 = lm(magnetic ~ chemical + I(chemical^2)) 
+plot(chemical, magnetic, main="Quadratic", pch=16) 
+yhat2 = L2$coef[1] + L2$coef[2] * a + L2$coef[3] * a^2 
+lines(a, yhat2, lwd=2)
+```
+
+
+
+Finally, we clean the memory of the variables.
+
+```{r}
+detach(ironslag)
+detach(package:DAAG)
+rm(list = ls())
+```
+
+
+[Back to the Question](#question6)
+
+### Exercise 8.2 {#question3ans6}
+
+**Problem.** 
+
+Implement the bivariate Spearman rank correlation test for independence [255] as a permutation test. The Spearman rank correlation test statistic can be obtained from function cor with method = "spearman". Compare the achieved significance level of the permutation test with the p-value reported by `cor.test` on the same samples.
+
+
+**Solution.**
+
+
+
+First, we generate the sample from $(X_1,X_2)\sim N(\vec\mu,\Sigma)$ in which $\vec\mu = (1,2)'$
+$$
+\Sigma = \begin{pmatrix}
+1 & 0.6 \\
+0.6 & 1 \\
+\end{pmatrix}
+$$
+Both $X_1$ and $X_2$ has 50 samples.
+
+```{r}
+# data generation 1
+library(MASS)
+data_generate_1 = function(mu=c(1,2),sigma=matrix(c(1,0.6,0.6,1),2,2),n=50){
+  data = mvrnorm(n,mu,sigma)
+  data
+}
+```
+
+
+We then generate from which are not distributed normally.
+
+```{r}
+# data generation 2
+data_generate_2 = function(n){
+  Y1 = rexp(n)
+  Y2 = 0.6*Y1+1
+  data = data.frame(Y1,Y2)
+  data
+}
+```
+
+Then let's compare the p_value from permutation test and the bivariate Spearman rank correlation.
+
+```{r}
+# permutation test function
+set.seed(22015)
+permutation_test = function(R = 1000,X1,X2){
+  n = length(X1)
+  z= c(X1,X2)
+  reps = numeric(R)
+  s0 = cor.test(X1,X2,method = "spearman")$estimate
+  for (i in 1:R){
+  k = sample(1:(2*n),size = n,replace = FALSE)
+  x1 = z[k]
+  x2 = z[-k]
+  reps[i] = cor.test(x1,x2,method = "spearman")$estimate
+}
+  p = mean(abs(c(s0,reps)) >= abs(s0))
+  p
+}
+```
+
+```{r}
+#result report
+result_report = function(data,type){
+  X1 = data[,1]
+  X2 = data[,2]
+  p1_permuation = permutation_test(R=1000,X1,X2)
+  p1_spearman = cor.test(X1,X2,method = "spearman")$p.value
+  list("type" = type, "p1_permuation" = p1_permuation,"p1_spearman"=p1_spearman)
+}
+```
+
+
+```{r}
+data1 = data_generate_1(mu=c(1,2),sigma=matrix(c(1,0.6,0.6,1),2,2),n=50)
+data2 = data_generate_2(n=50)
+result_report(data1,"normal")
+result_report(data2,"non-normal")
+```
+
+We can see that the p_value is approximately the same as each other in both situations.
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+detach(package:MASS)
+```
+
+
+
+
+  
+
+
+[Back to the Question](#question6)
+
+  
+# HW7: "A-22015-2022-10-28"
+
+## Question {#question7}
+
+1.  Exercises 9.4 (pages 277, Statistical Computing with R). [Jump to the
+    Answer](#question1ans7)
+
+2.  Exercises 9.7 (pages 278, Statistical Computing with R). [Jump to the
+    Answer](#question2ans7)
+
+
+## Answer
+
+### Exercise 9.4 {#question1ans7}
+<font size=4.5>
+**Problem.**
+
+Implement a random walk Metropolis sampler for generating the standard Laplace distribution (see Exercise 3.2). For the increment, simulate from a normal distribution. Compare the chains generated when different variances are used for the proposal distribution. Also, compute the acceptance rates of each chain.
+
+*use the Gelman-Rubin method to monitor convergence of the chain, and run
+the chain until it converges approximately to the target distribution according to $\hat R < 1.2$.
+
+**Solution.** 
+
+
+The standard Laplace distribution has density 
+$$f(x)=\frac{1}{2} e^{-|x|}, x \in \mathbb{R}$$ 
+
+and
+
+$$r\left(x_t, y\right)=\frac{f(y)}{f\left(x_t\right)}=\frac{e^{-|y|}}{e^{-\left|x_t\right|}}=e^{\left|x_t\right|-|y|}$$
+
+Let the proposal distribution follows $N(X_t,\sigma^2)$ in which $\sigma = 0.5, 1, 2,4,6,8$.
+
+
+```{r}
+set.seed(22015)
+rw.Metropolis = function(sigma, x0, N) {
+# sigma:  standard variance of proposal distribution N(xt,sigma)
+# x0: initial value
+# N: size of random numbers required.
+    x = numeric(N)
+    x[1] = x0
+    u = runif(N)
+    k = 0
+    for (i in 2:N) {
+        y = rnorm(1, x[i-1], sigma)
+        if (u[i] <= exp(abs(x[i-1]) - abs(y)) )
+            x[i] = y  
+        else {
+              x[i] = x[i-1]
+              k = k + 1
+            }
+        }
+      return(list(x=x, k=k))
+}
+
+n = 6000 # N: size of random numbers required.
+sigma = c(.5, 1, 2,4,6,8)
+
+x0 = 0
+rw1 = rw.Metropolis(sigma[1], x0, n)
+rw2 = rw.Metropolis(sigma[2], x0, n)
+rw3 = rw.Metropolis(sigma[3], x0, n)
+rw4 = rw.Metropolis(sigma[4], x0, n)
+rw5 = rw.Metropolis(sigma[5], x0, n)
+rw6 = rw.Metropolis(sigma[6], x0, n)
+#number of candidate points rejected
+print(c(rw1$k, rw2$k, rw3$k, rw4$k,rw5$k,rw6$k)/n)
+```
+
+```{r,fig.align='center'}
+# trace plot
+b = 1000
+plot(rw1$x[(b+1):n],type = "l",ylab = "chain",col=1,ylim = c(-10,10))
+lines(rw2$x[(b+1):n],type = "l",  ylab = "chain",col=2)
+lines(rw3$x[(b+1):n],type = "l",  ylab = "chain",col=3)
+lines(rw4$x[(b+1):n],type = "l",  ylab = "chain",col=4)
+lines(rw5$x[(b+1):n],type = "l",  ylab = "chain",col=5)
+lines(rw6$x[(b+1):n],type = "l",  ylab = "chain",col=6)
+legend("bottomright", legend = sigma,lty=1,col = 1:6)
+```
+
+
+
+According to the trace plot and diagnostic statistics plot above, we can assume that the chain 2 where $\sigma=1$ looks like converge to our aim distribution. And its rejection rate equals to 0.297 which is suitable for choice.
+
+
+Then I will use the Gelman-Rubin method to monitor convergence of the chain 2 in which  overdispersed initial values are chosen. 
+
+```{r}
+Gelman.Rubin = function(psi) {
+      # psi[i,j] is the statistic psi(X[i,1:j])
+      # for chain in i-th row of X
+      psi = as.matrix(psi)
+      n = ncol(psi)
+      k = nrow(psi)
+
+      psi.means = rowMeans(psi)     #row means
+      B = n * var(psi.means)        #between variance est.
+      psi.w = apply(psi, 1, "var")  #within variances
+      W = mean(psi.w)               #within est.
+      v.hat = W*(n-1)/n +B/n     #upper variance est.
+      r.hat = v.hat / W             #G-R statistic
+      return(r.hat)
+}
+```
+
+```{r}
+x0 = c(-10,-5,5,10)
+rw41 = rw.Metropolis(sigma[2], x0[1], n)
+rw42 = rw.Metropolis(sigma[2], x0[2], n)
+rw43 = rw.Metropolis(sigma[2], x0[3], n)
+rw44 = rw.Metropolis(sigma[2], x0[4], n)
+#compute diagnostic statistics
+X = rbind(rw41$x,rw42$x,rw43$x,rw44$x)
+psi = t(apply(X, 1, cumsum))
+for (i in 1:nrow(psi))
+    psi[i,] = psi[i,] / (1:ncol(psi))
+
+#plot the sequence of R-hat statistics
+rhat = rep(0, n)
+for (j in (b+1):n)
+    rhat[j] = Gelman.Rubin(psi[,1:j])
+plot(rhat[(b+1):n], type="l", xlab="", ylab="R",ylim=c(1,2.5))
+abline(h=1.2, lty=2)
+```
+
+We can see that the $\hat R$ is lower than 1.2  at about 3200 times after burnin period. 
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls()[c(ls()!=("Gelman.Rubin"))] )   
+```
+
+
+
+
+[Back to the Question](#question7)
+
+### Exercise 9.7 {#question2ans7}
+
+**Problem.** 
+
+Implement a Gibbs sampler to generate a bivariate normal chain $(X_t,Y_t)$ with zero means, unit standard deviations, and correlation 0.9. Plot the generated sample after discarding a suitable burn-in sample. Fit a simple linear regression model $Y = \beta_0 + \beta_1 X$ to the sample and check the residuals of the model for normality and constant variance.
+
+*use the Gelman-Rubin method to monitor convergence of the chain, and run
+the chain until it converges approximately to the target distribution according to $\hat R < 1.2$.
+
+
+**Solution.** 
+
+The target distribution is bivariate normal: $(X,Y)\sim N(\mu_1,\mu_2,\sigma^2_1,\sigma_2^2,\rho)$.
+
+And the conditional distributions $f(x|y)$ and $f(y|x)$ are: 
+    $$(x|y)\sim N(\mu_1+\rho\sigma_1/\sigma_2(y-\mu_2),(1-\rho^2)\sigma_1^2),$$
+    $$(y|x)\sim N(\mu_2+\rho\sigma_2/\sigma_1(x-\mu_1),(1-\rho^2)\sigma_2^2).$$
+
+* For $t=1,\ldots,T$
+    + 1. Sets $(x,y)=Z(t-1)$;
+    + 2. Generates $X^*(t)$ from $f(\cdot|y)$;
+    + 3. Updates $x=X^*(t)$;
+    + 4. Generates $X^*(t)$ from $f(\cdot|x)$;
+    + 5. Sets $X(t)=(X^*(t),Y^*(t))$.
+* End for
+
+We set length of chain: $N=8000$,Burn-in length = 1000, $\sigma_1^2=1$, $\sigma^2_2=1$, $\rho=0.9$.
+
+First, we generate 5 bivariate normal chain using four different initial values from the codes below.
+
+```{r}
+set.seed(22015)
+
+###### generate the chain #####
+bivariate_normal_chain = function(mu1,mu2,sigma1,sigma2,rho,N){
+  Z = matrix(0, N, 2) #the chain, a bivariate sample
+  Z[1, ] = c(mu1, mu2) #initialize
+  s1 = sqrt(1-rho^2)*sigma1
+  s2 = sqrt(1-rho^2)*sigma2
+  for (i in 2:N) {
+    y = Z[i-1, 2]
+    m1 = 0 + rho * (y - 0) * sigma1/sigma2
+    Z[i, 1] = rnorm(1, m1, s1)
+    x = Z[i, 1]
+    m2 = 0 + rho * (x - 0) * sigma2/sigma1
+    Z[i, 2] = rnorm(1, m2, s2)
+  }
+  return(Z)
+}
+#initialize constants and parameters
+N = 8000 #length of chain
+burn = 1000 #burn-in length
+rho = 0.9 #correlation
+k = 5 # number of initial values
+mu1 = c(-15,-10,0,5,10)
+mu2 = c(-15,-10,0,5,10)
+sigma1 = 1
+sigma2 = 1
+Z = array(0,dim = c(k,N,2))
+for (i in 1:k){
+  Z[i,,] = bivariate_normal_chain(mu1[i],mu2[i],sigma1,sigma2,rho,N)
+}
+```
+
+Then I will use the Gelman-Rubin method to monitor convergence of the chains in which  overdispersed initial values are chosen.
+
+
+According to the General Methods for Monitoring Convergence of Iterative Simulations by Stephen P. BROOKSand Andrew GELMAN, there are a number of multivariate approaches available to us. When we are interested in the estimation of a vector parameter $\psi$ based upon observations $\psi_{jt}^{(i)}$ denoting the $i$ th element of the parameter vector in chain $j$ at time $t$, the direct analogue of the univariate approach in higher dimensions is to estimate the posterior variance-covariance matrix by
+$$
+\widehat{V}=\frac{n-1}{n} W+\left(1+\frac{1}{m}\right) B / n
+$$
+where
+$$
+W=\frac{1}{m(n-1)} \sum_{j=1}^m \sum_{t=1}^n\left(\psi_{j t}-\bar{\psi}_{j .}\right)\left(\psi_{j t}-\bar{\psi}_{j .}\right)^{\prime}
+$$
+
+and
+$$
+B / n=\frac{1}{m-1} \sum_{j=1}^m\left(\bar{\psi}_{j .}-\bar{\psi}_{. .}\right)\left(\bar{\psi}_{j .}-\bar{\psi}_{. .}\right)^{\prime}
+$$
+
+We would like to summarize the distance between $\widehat{V}$ and $W$ with a scalar measure which should approach 1 (from above) as convergence is achieved, given suitably overdispersed starting points. Many such measures can be constructed; we will work with the maximum root statistic, which is the maximum SRF of any linear projection of $\psi$, given by
+$$
+\widehat{R}^p=\max _a \frac{a^{\prime} \widehat{V} a}{a^{\prime} W a},
+$$
+which we call the multivariate PSRF (or MPSRF) .
+
+And
+$$
+\widehat{R}^p=\frac{n-1}{n}+\left(\frac{m+1}{m}\right) \lambda_1,
+$$
+where $\lambda_1$ is the largest eigenvalue of the symmetric, positive definite matrix $W^{-1} B / n$.
+
+In the article we mentioned before, Lemma 3 can help us "calculate" the multivariate PSRF.
+
+Lemma 3. For $k=1, \ldots, p$, let $\widehat{R}(k)$ be the univariate PSRF , applied to the simulations of the kth element of $\theta$. If $\widehat{R}^{\max }$ denotes the maximum of the $\widehat{R}(k)$ values (over $k=1, \ldots, p)$ then,
+$$
+\widehat{R}^{\max } \leq \widehat{R}^p
+$$
+where $\widehat{R}^p$ is the MPSRF defined before, applied to the vector of parameters, $\theta$.
+
+```{r}
+#compute diagnostic statistics
+psi = apply(Z, c(1,3), cumsum)
+for (i in 1:dim(psi)[2]){
+  for (j in 1:dim(psi)[3]){
+    psi[,i,j] = psi[,i,j] / (1:dim(psi)[1])
+  }
+}
+```
+
+```{r}
+Gelman.Rubin_muti_lemma2 = function(psi){
+      n = dim(psi)[1] #n
+      k = dim(psi)[2] #chain numbers
+      p = dim(psi)[3] #parameter numbers
+      psi.w = array(0,c(p,p,k))
+      for (i in 1:k){
+        psi.w[,,i] = cov(psi[,i,])
+      }
+      
+      W = apply(psi.w, c(1,2), "mean")
+      B.1 = cov(apply(psi,c(2,3),"mean" ))
+      #v.hat = W*(n-1)/n +B/n     
+      
+      # solve max singular value
+       lamda = eigen(solve(W)%*%B.1)$val
+       r.hat = (n-1)/n + (k+1)/k*max(lamda)
+      
+      return(r.hat)
+}
+
+Gelman.Rubin_muti_lemma3 = function(psi){
+      n = dim(psi)[1] #n
+      k = dim(psi)[2] #chain numbers
+      P = dim(psi)[3] #parameter numbers
+      R = rep(0,P)
+      for (p in 1:P){
+      data = t(psi[,,p])
+      R[p] = Gelman.Rubin(data)
+      }
+      return(max(R)**{1/P})
+}      
+
+```
+
+
+```{r}
+#plot the sequence of R-hat statistics
+rhat = rep(0, N)
+for (j in (burn+1):N)
+    rhat[j] = Gelman.Rubin_muti_lemma3(psi[1:j,,])
+plot(rhat[(burn+1):N], type="l", xlab="", ylab="R")
+abline(h=1.2, lty=2)
+```
+
+We can see that the $\hat R$ has been lower than 1.2 after burnin period. The scatterplot of the generated chain (after discarding the burn-in sample) is shown below.
+
+```{r,eval=FALSE}
+par(mfrow=c(3,2))
+plot(Z[1,(burn+1):N,], main="", cex=.5, xlab=bquote(Z[1,(burn+1):N,1]),ylab=bquote(Z[1,(burn+1):N,2]))
+for (i in 2:k){
+  plot(Z[i,(burn+1):N,], main="", cex=.5, xlab=bquote(Z[i,(burn+1):N,1]),ylab=bquote(Z[i,(burn+1):N,2]))
+}
+```
+
+We fit a simple linear regression model $Y = \beta_0 + \beta_1 X$ to the sample and check the residuals of the model for normality and constant variance.
+
+```{r}
+x = c()
+y = c()
+for (i in 1:k){
+  x = c(x,Z[i,(burn+1):N,1])
+  y = c(y,Z[i,(burn+1):N,2])
+}
+linear_function = lm(y~x)
+```
+```{r}
+summary(linear_function)
+
+```
+
+The plot of residuals vs fits suggests that the error variance is constant with respect to the response variable. The QQ plot of residuals is consistent with the normal error assumption of the linear model.
+
+```{r}
+plot(linear_function)
+```
+
+
+
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+
+
+
+
+
+
+  
+
+
+[Back to the Question](#question7)
+
+# HW8："A-22015-2022-11-04"
+
+## Question {#question8}
+
+1.  Exercises 1  mediating effect [Jump to the Answer](#question1ans8)
+
+2.  Exercises 2  root-finding [Jump to the Answer](#question2ans8)
+
+
+## Answer
+
+
+### Exercise 1 {#question1ans8}
+
+**Problem.** 
+
+Consider the following  model
+    $$
+    M = a_M + \alpha X  + e_M\\
+    Y = a_Y +\beta M+\gamma X + e_r\\
+    e_M,e_Y \stackrel{i.i.d}{\sim} N(0,1)
+    $$
+
+1. $\alpha = 0$
+
+2. $\beta = 0$
+
+3. $\alpha = 0,\beta = 0$
+
+How to use permutation to test ?
+
+**Solution.** 
+
+
+First, I set $a_M=0,a_Y = 0,\gamma=1$ . Then I produce 3 different data from the list below.
+
+1. $\alpha = 0,\beta = 0$
+
+2. $\alpha = 0,\beta = 1$
+
+3. $\alpha = 1,\beta = 0$
+
+```{r}
+set.seed(22015)
+#generate the data
+data_generation = function(alpha,beta,n){
+  gamma = 1
+  x = seq(n)
+  m = alpha*x +rnorm(n)
+  y = beta*m +gamma*x+rnorm(n)
+  return(list(m=m,y=y,x=x))
+}
+```
+
+it has 3 hypothesis：
+
+1. $\alpha = 0$
+
+2. $\beta = 0$
+
+3. $\alpha = 0,\beta = 0$
+
+We then bulid the permutation test from the code below. If $\alpha = 0$，then X changes. If $\beta = 0$，then Y changes. If $\alpha = 0,\beta = 0$, then M change.
+
+The test statistic: $$T = \dfrac{\hat\alpha\hat\beta}{\hat{se}(\hat\alpha\hat\beta)}$$
+
+```{r}
+library("mediation")
+permutation_test = function(situation,R = 200,m,x,y){
+  model.m = lm(m~x)
+  model.y = lm(y~m+x)
+  model =  mediate(model.m, model.y,treat="x", mediator="m",sims=200)
+  t0 = model$d0/sd(model$d0.sims)
+  if (situation == 1){
+    #$\alpha = 0，X change$
+      n = length(x)
+      reps = numeric(R)
+      for (i in 1:R){
+         x1 = sample(x,n,replace = FALSE)
+        model.m = lm(m~x1)
+        model.y = lm(y~m+x1)
+        model =  mediate(model.m, model.y,treat="x1", mediator="m",sims=50)
+        reps[i] = model$d0/sd(model$d0.sims)
+      }
+    p = mean(abs(c(t0,reps)) >= abs(t0))
+    p
+  }
+if (situation == 2){
+    #$\beta = 0，Y change$
+      n = length(y)
+      reps = numeric(R)
+      for (i in 1:R){
+         y1 = sample(y,n,replace = FALSE)
+        model.m = lm(m~x)
+        model.y = lm(y1~m+x)
+        model =  mediate(model.m, model.y,treat="x", mediator="m",sims=50)
+        reps[i] = model$d0/sd(model$d0.sims)
+      }
+    p = mean(abs(c(t0,reps)) >= abs(t0))
+    p
+  }
+if (situation == 3){
+    #$\alpha = 0,\beta = 0，M change$
+      n = length(m)
+      reps = numeric(R)
+      for (i in 1:R){
+        m1 = sample(m,n,replace = FALSE)
+        model.m = lm(m1~x)
+        model.y = lm(y~m1+x)
+        model =  mediate(model.m, model.y,treat="x", mediator="m1",sims=50)
+        reps[i] = model$d0/sd(model$d0.sims)
+      }
+    p = mean(abs(c(t0,reps)) >= abs(t0))
+    p
+  }  
+return(p)
+}
+```
+
+
+
+
+
+```{r}
+result_report = function(alpha = 0,beta = 1,n=100){
+  data = data_generation(alpha,beta ,n)
+  p = rep(0,3)
+  for (i in 1:3){
+    p[i]=permutation_test(i,R=50,data$m,data$x,data$y)
+  } 
+  return(p)
+}
+```
+
+
+```{r}
+n = 100# the number of the data
+a0b1 = result_report(0,1,n)
+a1b0 = result_report(1,0,n)
+a0b0 = result_report(0,0,n)
+knitr::kable(data.frame(a0b1,a1b0,a0b0))
+```
+
+
+
+We can see that the according result is correct under the different way of data generation.
+
+
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+
+
+
+
+
+
+  
+
+
+[Back to the Question](#question8)
+
+### Exercise 2 {#question2ans8}
+<font size=4.5>
+**Problem.**
+
+Consider the following logistic regression model
+    $$P(D=1|X_1=x_1,X_2=x_2,X_3=x_3)=\frac{\exp(\alpha+\beta_1 x_1+\beta_2 x_2+\beta_3 x_3)}{1+\exp(\alpha+\beta_1 x_1+\beta_2 x_2)}$$
+
+$X_1 \sim P(1), X_2 \sim Exp(1), X_3 \sim B(1,0.5)$.
+
++ Basic idea
+      + The prevalence $f=P(D=1)$ is a funtion of $\alpha$ given the other parameters, say $f=f(\alpha)$.
+      + The problem becomes solving $f(\alpha)=f_0$ (find the root of $f(\alpha)-f_0$).
+      + Approximate $f(\alpha)$ using the proportions of diseased subjects for any given $\alpha$.
+
+Do the exercises like  the example in class.
+
+**Solution.** 
+
+1. Write an R function with input including $N,\beta_1,\beta_2,\beta_3,f_0$ and output including $\alpha$.
+
+
+```{r}
+calculate_alpha = function(N,beta1,beta2,beta3,f0) {
+    x1 = rpois(N,lambda = 1)
+    x2 = rexp(N,rate = 1)
+    x3 = sample(0:1,N,replace = TRUE)
+    g = function(alpha){
+      tmp = exp(-alpha-beta1*x1-beta2*x2-beta3*x3)
+      p = 1/(1+tmp)
+      mean(p) - f0
+    }
+    solution = uniroot(g,c(-100,0))
+    print(round(unlist(solution),5)[1:3])
+    print(round(unlist(solution),5)[-(1:3)])
+    alpha = solution$root
+    # add function to check the results
+    tmp = exp(-alpha-beta1*x1-beta2*x2-beta3*x3)
+    p = 1/(1+tmp)
+    d = rbinom(N,1,p)
+    cat("check the precalenca:",mean(d)-f0,"\n")
+    return(alpha)
+}
+
+```
+
+
+2. call the calculate_alpha and instantiat it with given numbers.
+
+```{r}
+set.seed(22015)
+N = 1e6
+beta1 = 0
+beta2 = 1
+beta3 = -1
+f0_list = c(0.1,0.01,0.001,0.0001)
+alpha_list = rep(0,length(f0_list))
+counter = 1
+for (f0 in f0_list){
+  alpha_list[counter] = calculate_alpha(N,beta1,beta2,beta3,f0)
+  counter = counter+1
+}
+alpha_list
+```
+
+3. plot the scatter plot between $f_0$ and $\alpha$, we can see the propotional relationship between them.
+
+```{r,fig.align='center'}
+plot(-log(f0_list),alpha_list)
+```
+
+
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+
+
+
+[Back to the Question](#question8)
+
+
+# HW9: "A-22015-2022-11-11"
+
+## Question {#question9}
+
+1.  Exercises 1  class work [Jump to the Answer](#question1ans9)
+
+2.  Exercises 2  2.1.3 Exercise 4, 5 (Pages 19 Advanced in R)[Jump to the Answer](#question2ans9)
+
+3.  Exercises 3  2.3.1 Exercise 1, 2 (Pages 26 Advanced in R)[Jump to the Answer](#question3ans9)
+
+4.  Exercises 4  2.4.5 Exercise 1, 2, 3 (Pages 30 Advanced in R)[Jump to the Answer](#question4ans9)
+
+## Answer
+
+
+### Exercise 1 {#question1ans9}
+
+**Problem.** 
+
+```{r, fig.align='center', echo=FALSE}
+library(knitr)
+knitr::include_graphics("../inst/Q1.png")
+```
+
+**Solution.** 
+
+```{r, fig.align='center', echo=FALSE}
+library(knitr)
+knitr::include_graphics("../inst/A1.jpg")
+knitr::include_graphics("../inst/A2.jpg")
+```
+
+
+
+
+Then we calculate the Q2 by the code below.
+```{r}
+# import data
+n = 10
+data = matrix(data=c(11,12,8,9,27,28,13,14,16,17,0,1,23,24,10,11,24,25,2,3),ncol = 2,nrow = 10,byrow = TRUE)
+```
+```{r, warning=FALSE}
+# method1 use stats4
+library(stats4)
+mlogL = function(lambda=4){
+  s = 0
+  for (i in 1:n){
+    s = s + log(exp(-lambda*data[i,1])-exp(-lambda*data[i,2]))
+  }
+  return(-s)
+}
+fit = mle(mlogL)
+```
+```{r}
+print(fit@coef)
+```
+
+
+```{r,eval=FALSE}
+set.seed(22015)
+N = 1e6
+mlogL_partial = function(lambda){
+  s = 0
+  for (i in 1:n){
+    u = data[i,1]
+    v = data[i,2]
+    s = s + (v*exp(-lambda*v)-u*exp(-lambda*u))/(exp(-lambda*u)-exp(-lambda*v))
+  }
+  return(s)
+}
+solution2 = uniroot(mlogL_partial,c(0,10))
+print(unlist(solution2),5)[-(1:3)]
+```
+
+
+
+```{r}
+# em
+get_denominator = function(lambda){
+  s = 0
+  for (i in 1:n){
+    u = data[i,1]
+    v = data[i,2]
+    d = exp(-lambda*u)-exp(-lambda*v)
+    f = exp(-lambda*u)*(u+1/lambda)-exp(-lambda*v)*(v+1/lambda)
+    s = s + f/d
+  }
+  return(s)
+}
+
+EM = function(max.it=1000,eps=1e-5){
+  lambda = 1
+  i = 1
+  lambda1 = lambda
+  lambda2 = n/get_denominator(lambda1)
+  while( abs(lambda1 - lambda2) >= eps){
+    lambda1 = lambda2
+    lambda2 = n/get_denominator(lambda1)
+    print(round(c(lambda2),5))
+    if(i == max.it) {
+      print("cannot converge") 
+      break
+    }
+    i = i + 1    
+    
+  }
+  return(lambda2)
+}
+EM(max.it=10000,eps=1e-5)
+```
+
+
+We can see both methods get the estimated value of 0.072.
+
+
+Finally, we clean the memory of the variables.
+
+```{r}
+rm(list = ls())
+```
+
+
+
+
+
+
+
+  
+
+
+[Back to the Question](#question9)
+
+### Exercise 2 {#question2ans9}
+<font size=4.5>
+**Problem 4.**
+
+Why do you need to use unlist() to convert a list to an atomic vector? Why doesn’t as.vector() work?
+
+
+**Solution.** 
+
+We know that a list is already a vector but it is not an atomic one. So we need to use the unlist() to flatten the nested structure.
+
+From the R documentation we can see the guide below.
+
+Given a list structure x, unlist simplifies it to produce a vector which contains all the atomic components which occur in x.
+
+For as.vector, a vector (atomic or of type list or expression). All attributes are removed from the result if it is of an atomic mode, but not in general for a list or expression result.
+
+
+
+
+
+```{r}
+# R  program to illustrate1
+# converting list to vector
+# Creating a list.
+my_list_1 =list(l1 = c(1, 3),                
+                l2 = c(1, 2, 3))   
+# Apply unlist R function
+print(my_list_1)
+print(unlist(my_list_1))  
+print(as.vector(my_list_1))
+```
+```{r}
+# R program to illustrate2
+# Unlisting list with data frame
+# Creating a list.
+my_list_2 = list(l1 = c(1, 3),                
+                l2 = c(1, 2, 3))   
+  
+# Add a data frame to the list                              
+my_list_2[[3]] <- data.frame(x1 = c(1, 2, 3),       
+                             x2 = c(4, 5, 6))
+  
+# Unlist list with data.frame
+print(my_list_2)
+print(unlist(my_list_2, use.names = FALSE))
+print(as.vector(my_list_2))
+```
+
+
+**Problem 5.**
+
+ Why is 1 == "1" true? Why is -1 < FALSE true? Why is "one" < 2 false?
+
+
+**Solution.** 
+
+All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.
+These comparisons are carried out by operator-functions (==, <), which coerce their arguments to a common type. In the examples above, these types will be character, double and character: 1 will be coerced to "1", FALSE is represented as 0 and 2 turns into "2" (and numbers precede letters in lexicographic order (may depend on locale)).
+
+```{r}
+c(1 == "1",-1 < FALSE,"one" < 2)
+```
+
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+
+### Exercise 3 {#question3ans9}
+<font size=4.5>
+**Problem 1.**
+
+1. What does dim() return when applied to a vector?
+
+
+**Solution.** 
+
+Return NULL.
+
+For an array (and hence in particular, for a matrix) dim retrieves the dim attribute of the object. It is NULL or a vector of mode integer.
+
+```{r}
+x = c(1,2,5 )
+dim(x)
+nrow(x)
+ncol(x)
+NROW(x)
+NCOL(x)
+```
+
+
+
+**Problem 2.**
+
+2.If is.matrix(x) is TRUE, what will is.array(x) return?
+
+**Solution.** 
+
+True. A two-dimensional array is the same thing as a matrix.
+
+```{r}
+x = matrix(c(2,0,2,2,1,1),2,3)
+is.matrix(x)
+is.array(x)
+```
+
+Finally, we clean the memory of the variables.
+```{r}
+rm(list = ls() )   
+```
+
+### Exercise 4 {#question4ans9}
+<font size=4.5>
+**Problem 1.**
+
+1. What attributes does a data frame possess?
+
+
+**Solution.**
+
+names, row.names and class.
+ 
+Under the hood, a data frame is a list of equal-length vectors. This makes it a 2-dimensional structure, so it shares properties of both the matrix and the list. This means that a data frame has names(), colnames(), and rownames(), although names() and colnames() are the same thing. The length() of a data frame is the length of the underlying list and so is the same as ncol(); nrow() gives the number of rows.
+
+**Problem 2.**
+
+2. What does as.matrix() do when applied to a data frame with columns of different types?
+
+
+**Solution.**
+
+as.matrix is a generic function. The method for data frames will return a character matrix if there is only atomic columns and any non-(numeric/logical/complex) column, applying as.vector to factors and format to other non-character columns. Otherwise, the usual coercion hierarchy (logical < integer < double < complex) will be used.
+
+```{r}
+x = data.frame(a = c(1,2,3),b = c("1","2","3"),c = c(TRUE,FALSE,TRUE))
+str(x)
+y = as.matrix(x)
+str(y)
+```
+
+
+**Problem 3.**
+
+3. Can you have a data frame with 0 rows? What about 0 columns?
+
+
+**Solution.**
+
+Yes.
+
+```{r}
+# data frame with 0 columns and 0 rows
+R1 = data.frame()
+R1
+# data frame with  0 rows
+R2 = data.frame(a=integer(), b=logical(0),c=numeric(0),d=character(0)) 
+R2
+# data frame with  0 columns
+R3 = data.frame(row.names = c("a","b","c"))
+R3
+```
+
+
+
+
+[Back to the Question](#question9)
+
 
 
 # HW10: "A-22015-2022-11-18"

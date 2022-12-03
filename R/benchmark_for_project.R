@@ -14,7 +14,12 @@
 #' @import microbenchmark
 #' @import lattice
 #' @import xtable
-#' @import EnvStats
+#' @import boot
+#' @import bootstrap
+#' @import DAAG
+#' @import MASS
+#' @import mediation
+#' @import knitr
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats rnorm rgamma runif dt mahalanobis
 #' @importFrom graphics axis legend lines par

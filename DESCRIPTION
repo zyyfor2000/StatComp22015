@@ -1,13 +1,14 @@
 Package: StatComp22015
 Type: Package
 Title: Final project for 'Statistical Computing' course
-Version: 1.5.1
+Version: 1.6.1
 Date: 2022-11-27
 Author: 22015
 Maintainer: zyyfor2000<482225121@qq.com>
 Description: Several R and Rcpp functions.
 License: GPL (>= 2)
-Imports: Rcpp, microbenchmark, knitr, rmarkdown, lattice, xtable, EnvStats, graphics
+Imports: Rcpp, microbenchmark, knitr, rmarkdown, lattice, xtable, graphics,
+          boot,bootstrap,DAAG,MASS,mediation
 LinkingTo: Rcpp
 RoxygenNote: 7.2.2
 Encoding: UTF-8

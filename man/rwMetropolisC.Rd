@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{rwMetropolisC}
 \alias{rwMetropolisC}
-\title{Use three inputs to predict response using Rcpp.}
+\title{A random walk Metropolis sampler using R for t distribution using Rcpp.}
 \usage{
 rwMetropolisC(n, sigma, x0, N, burn)
 }
@@ -21,12 +21,13 @@ rwMetropolisC(n, sigma, x0, N, burn)
 a random sample of size \code{N-burn}
 }
 \description{
-The prediction model is described in http://www.babelgraph.org/wp/?p=358.
+A random walk Metropolis sampler using R.
 }
 \examples{
 \dontrun{
-data(data)引用数据的方式
-attach(data)
-res <- test(n)
+X = rwMetropolisC(2,1,1,100,2) #n = 2
+a = c(0.05,seq(0.1,0.9,0.1),0.95)
+Q = qt(a,2)
+qqplot(a,quantile(X,a))
 }
 }

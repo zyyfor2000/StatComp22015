@@ -20,7 +20,6 @@
 #'}
 #' @export
 plot_s = function(counter,result){
-  #图例在控制区外必须要留空间
   sigma = c(1:10)
   par(mai = c(0.8,0.8,0.8,1))
   n_total = c(5,10,20,100)

@@ -11,9 +11,11 @@ vignette: >
 
 ## Overview
 
-__StatComp22015__ is a simple R package developed to compare the performance of R and R++ (implemented through the R package _Rcpp_) for the 'Statistical Computing' course. Two functions are considered, namely, _gibbs_ (generate random nubers using Gibbs sampler) and _vacc_ (predicting the response using three variables: age, gender, and ily). For each function, both R and Rcpp versions are produced. Namely _gibbsR_ and  _vaccR_ for R and 'gibbC' and _vaccC_ for C++.
+__StatComp22015__ is a simple R package developed to compare the performance of R and R++ (implemented through the R package _Rcpp_) for the 'Statistical Computing' course. Two functions are considered, namely, _gibbs_ (generate random nubers using Gibbs sampler) and _rwMetropolis_ (A random walk Metropolis sampler for t distribution). For each function, both R and Rcpp versions are produced. Namely _gibbsR_ and  _rwMetropolisR_ for R and _gibbC_ and _rwMetropolisC_ for C++.
 
 The R package 'microbenchmark' can be used to benchmark the above R and C++ functions.
+
+Besides, __StatComp22015__ also includes my simulation graphic results. The plot procedure is finished by R and the calculation is finished by Python which you can find [here](https://github.com/zyyfor2000/code)
 
 
 ```{r,eval=TRUE}
@@ -86,7 +88,7 @@ knitr::kable(summary(tm1)[,c(1,3,5,6)])
 
 The results again show an evident computational speed gain of C++ against R.
 
-## Benchmarking _gibbsR_ and _gibbsC_
+## Benchmarking _rwMetropolisR_ and _rwMetropolisC_
 
 The source R code for _rwMetropolisR_ is as follows:
 ```{r,eval=FALSE}
@@ -131,7 +133,7 @@ NumericVector rwMetropolisC(int n, double sigma, double x0, int N, int burn) {
 }
 ```
 
-The R code for benchmarking _gibbsR_ and _gibbsC_ is as follows.
+The R code for benchmarking _rwMetropolisR_ and _rwMetropolisC_ is as follows.
 
 ```{r,eval=TRUE}
 tm1 = microbenchmark(
@@ -144,13 +146,41 @@ knitr::kable(summary(tm1)[,c(1,3,5,6)])
 The results again show an evident computational speed gain of C++ against R.
 
 
-## the graph illustration of my simulation result 
+## Graphical displays of my simulation result: _plot_s_
 
 
-To reproduce the code in papar called A general method for addressing forecasting uncertainty in inventory models, I make a visual display as follows.
+In the paper called A general method for addressing forecasting uncertainty in inventory models, 3 methods have been proposed to solve the question below.
+$$
+\begin{equation}
+	TC(S_n) = h*E(S_n -D_{[n+1,n+L]})^+ +b*E(S_n -D_{[n+1,n+L]})^-
+\end{equation}
+$$
 
-```{r,echo=FALSE}
-#导入结果
+All the three methods are about parameter methods. Then  I apply 6 methods about nonparameter methods to compare.
+
+To reproduce the table in papar, I present graphical displays of the table in the paper as follows.
+
+```{r,eval=FALSE}
+plot_s = function(counter,result){
+  sigma = c(1:10)
+  par(mai = c(0.8,0.8,0.8,1))
+  n_total = c(5,10,20,100)
+  plot(c(1:9),result[1,counter,],type = "l",col=1,ylim=c(min(result[,counter,]-5),max(result[,counter,])+5),ylab = "total cost" ,xlab = "method",main = bquote(n == .(n_total[counter])))
+  axis(1,"m",at = seq(1,9,1),labels = TRUE)
+  for (i in 2:10){
+    lines(result[i,counter,],type = "l",col=i)
+  }
+  usr = par("usr")
+  x = usr[2]*1.02
+  y = usr[4]*0.9
+  legend(x,y, legend = sigma,lty=1,col = 1:10,ncol = 1,title = expression(sigma^2),xpd = TRUE)
+}
+```
+
+Let's see how my simulation takes on.
+
+```{r}
+# my results are imported as data existed
 result = array(data = 0, dim = c(10,4,9))
 for (i in 1:10){
   a = read.table(paste("../data/text",i,".txt",sep = ""))

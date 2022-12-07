@@ -1,5 +1,5 @@
 
-#' @title A illustration dataset called Bank_loan
+#' @title An illustration dataset called Bank_loan
 #' @name Bank_loan
 #' @description A dataset in homework0.
 #' @examples

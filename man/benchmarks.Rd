@@ -4,7 +4,7 @@
 \alias{benchmarks}
 \title{Benchmark R and Rcpp functions.}
 \description{
-Use R package \code{microbenchmark} to compare the performance of C functions (\code{gibbsR} and \code{vaccR}) and Cpp functions (\code{gibbsC} and \code{vaccC}).
+Use R package \code{microbenchmark} to compare the performance of C functions (\code{gibbsR} and \code{rwMetropolisR}) and Cpp functions (\code{gibbsC} and \code{rwMetropolisC}).
 }
 \examples{
 \dontrun{

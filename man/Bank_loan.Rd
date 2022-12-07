@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_packet.R
 \name{Bank_loan}
 \alias{Bank_loan}
-\title{A illustration dataset called Bank_loan}
+\title{An illustration dataset called Bank_loan}
 \description{
 A dataset in homework0.
 }

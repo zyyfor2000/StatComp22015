@@ -1,6 +1,6 @@
 #' @title Benchmark R and Rcpp functions.
 #' @name benchmarks
-#' @description Use R package \code{microbenchmark} to compare the performance of C functions (\code{gibbsR} and \code{vaccR}) and Cpp functions (\code{gibbsC} and \code{vaccC}).
+#' @description Use R package \code{microbenchmark} to compare the performance of C functions (\code{gibbsR} and \code{rwMetropolisR}) and Cpp functions (\code{gibbsC} and \code{rwMetropolisC}).
 #' @examples
 #' \dontrun{
 #' data(data)

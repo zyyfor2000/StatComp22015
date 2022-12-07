@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_packet.R
 \name{text10}
 \alias{text10}
-\title{my simulation data for sigma=10}
+\title{my simulation data for sigma2=10}
 \description{
 A dataset in introduction.
 }

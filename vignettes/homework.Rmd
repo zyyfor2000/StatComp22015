@@ -1882,14 +1882,14 @@ rm(list = ls() )
 
 **Problem.** 
 
-```{r, fig.align='center', echo=FALSE}
+```{r, fig.align='center', echo=FALSE, out.width="50%"}
 library(knitr)
 knitr::include_graphics("../inst/Q1.png")
 ```
 
 **Solution.** 
 
-```{r, fig.align='center', echo=FALSE}
+```{r, fig.align='center', echo=FALSE, out.width="50%"}
 library(knitr)
 knitr::include_graphics("../inst/A1.jpg")
 knitr::include_graphics("../inst/A2.jpg")

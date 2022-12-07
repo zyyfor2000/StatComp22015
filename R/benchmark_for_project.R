@@ -21,7 +21,7 @@
 #' @import mediation
 #' @import knitr
 #' @importFrom Rcpp evalCpp
-#' @importFrom stats rnorm rgamma runif dt mahalanobis
+#' @importFrom stats rnorm rgamma runif dt mahalanobis rchisq rnorm dbinom qnorm quantile var
 #' @importFrom graphics axis legend lines par
 #' @useDynLib StatComp22015
 NULL

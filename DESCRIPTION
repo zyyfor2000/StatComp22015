@@ -1,8 +1,8 @@
 Package: StatComp22015
 Type: Package
 Title: Final project for 'Statistical Computing' course
-Version: 1.7.1
-Date: 2022-11-27
+Version: 1.8.1
+Date: 2022-12-07
 Author: 22015
 Maintainer: zyyfor2000<482225121@qq.com>
 Description: Several R and Rcpp functions.

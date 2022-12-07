@@ -1,17 +1,3 @@
-#' @title A illustration dataset
-#' @name data
-#' @description A dataset used to illustrate the performance of \code{vaccR} and \code{vaccC}.
-#' @examples
-#' \dontrun{
-#' data(data)
-#' attach(data)
-#' tm <- microbenchmark::microbenchmark(
-#'   vR = vaccR(age,female,ily),
-#'   vC = vaccC(age,female,ily)
-#' )
-#' print(summary(tm)[,c(1,3,5,6)])
-#' }
-NULL
 
 #' @title A illustration dataset called Bank_loan
 #' @name Bank_loan
@@ -24,7 +10,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=1
+#' @title my simulation data for sigma2=1
 #' @name text1
 #' @description A dataset in introduction.
 #' @examples
@@ -33,7 +19,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=2
+#' @title my simulation data for sigma2=2
 #' @name text2
 #' @description A dataset in introduction.
 #' @examples
@@ -42,7 +28,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=3
+#' @title my simulation data for sigma2=3
 #' @name text3
 #' @description A dataset in introduction.
 #' @examples
@@ -51,7 +37,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=4
+#' @title my simulation data for sigma2=4
 #' @name text4
 #' @description A dataset in introduction.
 #' @examples
@@ -60,7 +46,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=5
+#' @title my simulation data for sigma2=5
 #' @name text5
 #' @description A dataset in introduction.
 #' @examples
@@ -69,7 +55,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=6
+#' @title my simulation data for sigma2=6
 #' @name text6
 #' @description A dataset in introduction.
 #' @examples
@@ -78,7 +64,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=7
+#' @title my simulation data for sigma2=7
 #' @name text7
 #' @description A dataset in introduction.
 #' @examples
@@ -87,7 +73,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=8
+#' @title my simulation data for sigma2=8
 #' @name text8
 #' @description A dataset in introduction.
 #' @examples
@@ -96,7 +82,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=9
+#' @title my simulation data for sigma2=9
 #' @name text9
 #' @description A dataset in introduction.
 #' @examples
@@ -105,7 +91,7 @@ NULL
 #' }
 NULL
 
-#' @title my simulation data for sigma=10
+#' @title my simulation data for sigma2=10
 #' @name text10
 #' @description A dataset in introduction.
 #' @examples
